@@ -6,3 +6,4 @@ const router = (0, express_1.Router)();
 router.get("/hello", hello_1.getHello);
 router.post("/hello", hello_1.addHello);
 exports.default = router;
+// XPJagMPthuI0knW0
