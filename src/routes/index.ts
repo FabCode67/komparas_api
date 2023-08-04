@@ -8,6 +8,5 @@ router.get("/hello", getHello)
 router.post("/hello", addHello)
 
 export default router
-// good?
 
 // XPJagMPthuI0knW0
