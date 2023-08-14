@@ -7,7 +7,7 @@ import {
     addUser, 
     updateUser, 
     deleteUser
- } from "../../controllers/Users/user.controler";
+ } from "../../controllers/Users/userCrud.controler";
  import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
 
 const router : Router = Router()

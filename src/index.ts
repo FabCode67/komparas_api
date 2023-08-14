@@ -14,6 +14,8 @@ app.use(cors());
 app.use(express.json());
 app.use(allRoutes.userRoutes);
 app.use(allRoutes.loginRoutes);
+app.use(allRoutes.roleRoutes)
+app.use(allRoutes.statusRoutes)
 app.use('/api-docs',swaggerUI.serve,swaggerUI.setup(docs));
 
 dotenv.config()

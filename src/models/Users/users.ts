@@ -1,4 +1,4 @@
-import { IUSer } from "../../types/hello";
+import { IUser } from "../../types/hello";
 import { model, Schema } from "mongoose";
 
 const userSchema: Schema = new Schema(
@@ -25,14 +25,16 @@ const userSchema: Schema = new Schema(
         },
         role: {
             type: String,
+            defaultValue: "buyer",
             required: false
         },
         status: {
             type: String,
-            required: false
+            defaultValue: "enabled",
+            required: false,
         }
     },
     { timestamps: true }
 )
 
-export default model<IUSer>("Users", userSchema)
+export default model<IUser>("Users", userSchema)

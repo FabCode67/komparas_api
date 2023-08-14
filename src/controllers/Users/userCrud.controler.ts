@@ -1,11 +1,11 @@
 import { Response, Request } from "express";
-import { IUSer } from "../../types/hello";
+import { IUser } from "../../types/hello";
 import Users from "../../models/Users/users";
 import { isValidEmail } from "../../middleware/emailValidity";
 
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
     try {
-        const users: IUSer[] = await Users.find().maxTimeMS(30000); 
+        const users: IUser[] = await Users.find().maxTimeMS(30000); 
         res.status(200).json({ users })
     } catch (error) {
         throw error
@@ -14,16 +14,15 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
 
     export const addUser = async (req: Request, res: Response): Promise<void> => {
         try {
-            const body = req.body as Pick<IUSer, "first_name" | "last_name" | "email" | "password" | "confirm_password" | "role" | "status">
+            const body = req.body as Pick<IUser, "first_name" | "last_name" | "email" | "password" | "confirm_password" | "role" >
     
-            if (!body.first_name || !body.last_name || !body.email || !body.password || !body.confirm_password || !body.role || !body.status) {
+            if (!body.first_name || !body.last_name || !body.email || !body.password || !body.confirm_password || !body.role) {
                 res.status(401).json({
                     status: false,
                     message: "Please fill all fields"
                 });
                 return;
             }
-    
             if (body.password !== body.confirm_password) {
                 res.status(401).json({
                     status: false,
@@ -47,8 +46,6 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
                 });
                 return;
             }
-    
-            // Check if email is already registered
             const existingUser = await Users.findOne({ email: body.email });
             if (existingUser) {
                 res.status(409).json({
@@ -58,18 +55,17 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
                 return;
             }
     
-            const newUser: IUSer = new Users({
+            const newUser: IUser = new Users({
                 first_name: body.first_name,
                 last_name: body.last_name,
                 email: body.email,
                 password: body.password,
                 confirm_password: body.confirm_password,
                 role: body.role,
-                status: body.status
+                status: "enabled"            
             });
-    
-            const newUsers: IUSer = await newUser.save();
-            const allUsers: IUSer[] = await Users.find();
+            const newUsers: IUser = await newUser.save();
+            const allUsers: IUser[] = await Users.find();
     
             res
                 .status(201)
@@ -86,11 +82,11 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
             params: { id },
             body,
         } = req
-        const updateUsers: IUSer | null = await Users.findByIdAndUpdate(
+        const updateUsers: IUser | null = await Users.findByIdAndUpdate(
             { _id: id },
             body
         )
-        const allUsers: IUSer[] = await Users.find()
+        const allUsers: IUser[] = await Users.find()
         res.status(200).json({
             message: "Users updated",
             users: updateUsers,
@@ -104,10 +100,10 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
 
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
     try{
-        const deletedUsers: IUSer | null = await Users.findByIdAndRemove(
+        const deletedUsers: IUser | null = await Users.findByIdAndRemove(
             req.params.id
         )
-        const allUsers: IUSer[] = await Users.find()
+        const allUsers: IUser[] = await Users.find()
         res.status(200).json({
             message: "Users deleted",
             users: deletedUsers,
@@ -120,7 +116,7 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
 
 export const getUserById = async (req: Request, res: Response): Promise<void> => {
     try{
-        const user: IUSer | null = await Users.findById(req.params.id)
+        const user: IUser | null = await Users.findById(req.params.id)
         res.status(200).json({
             message: "Success",
             user: user,
@@ -132,7 +128,7 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
 
 export const getUserByEmail = async (req: Request, res: Response): Promise<void> => {
     try{
-        const user: IUSer | null = await Users.findOne({email: req.params.email})
+        const user: IUser | null = await Users.findOne({email: req.params.email})
         res.status(200).json({
             message: "Success",
             user: user,
