@@ -3,7 +3,7 @@ export interface IHello extends Document {
   hello: string;
 }
 
-export interface IUSer extends Document {
+export interface IUser extends Document {
   first_name: string;
   last_name: string;
   email: string;

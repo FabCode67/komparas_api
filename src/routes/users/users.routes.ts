@@ -8,11 +8,11 @@ import {
     updateUser, 
     deleteUser
  } from "../../controllers/Users/user.controler";
- import { authenticat } from "../../middleware/auth/authorization";
+ import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
 
 const router : Router = Router()
 
-router.get("/users",authenticat, getUsers)
+router.get("/users",isAdminAuthenticat, getUsers)
 router.post("/users/add", addUser)
 router.put("/users/update/:id", updateUser)
 router.delete("/users/delete/:id", authenticat, deleteUser)
