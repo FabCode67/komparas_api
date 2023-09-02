@@ -1,5 +1,5 @@
 import { Response, Request } from "express"
-import { IHello } from "../../types/hello"
+import { IHello } from "../../types/users"
 import Hello from "../../models/hello"
 
 export const getHello = async (req: Request, res: Response): Promise<void> => {

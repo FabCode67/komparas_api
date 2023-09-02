@@ -1,5 +1,5 @@
 import { Response, Request } from "express";
-import { IUser } from "../../types/hello";
+import { IUser } from "../../types/users";
 import Users from "../../models/Users/users";
 
 export const changeUserRoleToAdmin =  async (req: Request, res: Response): Promise<void> => {

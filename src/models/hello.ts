@@ -1,4 +1,4 @@
-import { IHello } from "../types/hello"
+import { IHello } from "../types/users"
 import { model, Schema } from "mongoose"
 
 const helloSchema: Schema = new Schema(

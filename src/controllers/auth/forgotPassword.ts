@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
-import { IUser } from '../../types/hello';
+import { IUser } from '../../types/users';
 import Users from '../../models/Users/users';
 import bcrypt  from 'bcrypt'
 export const sendPasswordResetEmail = async (userEmail: string) => {
