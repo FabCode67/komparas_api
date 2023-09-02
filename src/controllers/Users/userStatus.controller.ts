@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
 import { IUser } from "../../types/users";
-import Users from "../../models/Users/users";
+import Users from "../../models/users";
 
 
 export const disableUser = async (req: Request, res: Response): Promise<void> => {

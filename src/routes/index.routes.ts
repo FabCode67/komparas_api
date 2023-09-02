@@ -3,11 +3,13 @@ import helloRoutes from "./hello/hello";
 import loginRoutes from "./auth/login.routes";
 import roleRoutes from "./users/userRole.routes"
 import statusRoutes from "./users/userStatus.routes"
+import categoriesRoutes from "./categories/categories.routes"
 
 export default {
     userRoutes,
     helloRoutes,
     loginRoutes,
     roleRoutes,
-    statusRoutes
+    statusRoutes,
+    categoriesRoutes
 };

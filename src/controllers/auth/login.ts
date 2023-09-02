@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt'; // Import bcrypt for password hashing
 import { IUser } from '../../types/users';
-import Users from '../../models/Users/users';
+import Users from '../../models/users';
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
         const body = req.body as Pick<IUser, 'email' | 'password'>;
