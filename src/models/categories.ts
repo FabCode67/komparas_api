@@ -1,20 +1,27 @@
 import {ICategories} from '../types/categories' 
 import { model, Schema } from 'mongoose'
 
-const categoryShema: Schema = new Schema(
+const categorySchema: Schema = new Schema(
     {
-        category_name:{
-            type: 'string',
-            required: true,
+      category_name: {
+        type: String,
+        required: true,
+      },
+      category_description: {
+        type: String,
+        required: true,
+      },
+      products: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'Product',
         },
-        category_description: {
-            type: 'string',
-            required: true,
-        }
+      ],
     },
     {
-        timestamps: true
+      timestamps: true,
     }
-)
+  );
+  
 
-export default model<ICategories>("Categories", categoryShema)
+export default model<ICategories>("Categories", categorySchema)
