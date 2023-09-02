@@ -1,4 +1,5 @@
 import { Router } from "express";
+import upload from "../../handlers/multer";
 
 import { 
     getUsers, 
@@ -12,8 +13,8 @@ import {
 
 const router : Router = Router()
 
-router.get("/users",isAdminAuthenticat, getUsers)
-router.post("/users/add", addUser)
+router.get("/users", getUsers)
+router.post("/users/add",  addUser);
 router.put("/users/update/:id", updateUser)
 router.delete("/users/delete/:id", authenticat, deleteUser)
 router.get("/users/:id", getUserById)

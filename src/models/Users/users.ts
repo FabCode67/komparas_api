@@ -32,6 +32,10 @@ const userSchema: Schema = new Schema(
             type: String,
             defaultValue: "enabled",
             required: false,
+        },
+        profile_picture: {
+            type: String,
+            required: false
         }
     },
     { timestamps: true }

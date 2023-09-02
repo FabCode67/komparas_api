@@ -12,10 +12,13 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
     }
     }
 
+
+
     export const addUser = async (req: Request, res: Response): Promise<void> => {
         try {
             const body = req.body as Pick<IUser, "first_name" | "last_name" | "email" | "password" | "confirm_password" | "role" >
-    
+          console.log(body);
+          
             if (!body.first_name || !body.last_name || !body.email || !body.password || !body.confirm_password || !body.role) {
                 res.status(401).json({
                     status: false,

@@ -11,4 +11,5 @@ export interface IUser extends Document {
   confirm_password: string;
   role: string;
   status: string;
+  profile_picture: string;
 }  
