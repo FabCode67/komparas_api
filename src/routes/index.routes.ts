@@ -4,6 +4,8 @@ import loginRoutes from "./auth/login.routes";
 import roleRoutes from "./users/userRole.routes"
 import statusRoutes from "./users/userStatus.routes"
 import categoriesRoutes from "./categories/categories.routes"
+import productsRoutes from "./products/productsCrud.routes"
+import subcategoryRoutes from "./categories/subcategory.routes"
 
 export default {
     userRoutes,
@@ -11,5 +13,7 @@ export default {
     loginRoutes,
     roleRoutes,
     statusRoutes,
-    categoriesRoutes
+    categoriesRoutes,
+    productsRoutes,
+    subcategoryRoutes
 };

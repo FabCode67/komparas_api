@@ -6,7 +6,9 @@ import {
     updateCategory,
     deleteCategory,
     getCategoryById,
-    getCategoryByName
+    getCategoryByName,
+    getCategoryWithProducts, 
+    getAllCategoriesWithProducts
 } from '../../controllers/categories/category.contorller';
 
 import { authenticat, isAdminAuthenticat } from '../../middleware/auth/authorization';
@@ -19,5 +21,7 @@ router.put('/categories/update/:id', authenticat, isAdminAuthenticat, updateCate
 router.delete('/categories/delete/:id', authenticat, isAdminAuthenticat, deleteCategory);
 router.get('/categories/:id', getCategoryById);
 router.get('/categories/name/:name', getCategoryByName);
+router.get("/categories/:categoryId/products", getCategoryWithProducts);
+router.get("/categories/products", getAllCategoriesWithProducts);
 
 export default router;

@@ -5,13 +5,10 @@ import allRoutes from "./routes/index.routes";
 import dotenv from "dotenv"
 import swaggerUI from "swagger-ui-express";
 import docs from "./docs";
-import formidable from 'express-formidable';
-import upload from "./handlers/multer";
+
 
 const app: Express = express();
-
-const PORT: string | number = process.env.PORT || 3002;
-
+const PORT: string | number = process.env.PORT || 8080;
 app.use(cors());
 
 
@@ -22,9 +19,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(allRoutes.helloRoutes);
 app.use(allRoutes.userRoutes);
 app.use(allRoutes.loginRoutes);
-app.use(allRoutes.roleRoutes)
-app.use(allRoutes.statusRoutes)
-app.use(allRoutes.categoriesRoutes)
+app.use(allRoutes.roleRoutes);
+app.use(allRoutes.statusRoutes);
+app.use(allRoutes.categoriesRoutes);
+app.use(allRoutes.productsRoutes);
+app.use(allRoutes.subcategoryRoutes);
 app.use('/api-docs',swaggerUI.serve,swaggerUI.setup(docs));
  
 dotenv.config()
