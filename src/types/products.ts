@@ -8,6 +8,7 @@ export interface IProducts extends Document {
     product_price: number;
     product_quantity: number;
     category_name: Types.ObjectId | ICategories;
+    subcategory_name: Types.ObjectId | ICategories;
     product_image: string;
     product_status: string;
 }

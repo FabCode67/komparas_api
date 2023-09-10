@@ -1,41 +1,48 @@
+// product.model.ts
 import { IProducts } from '../types/products';
 import { model, Schema } from 'mongoose';
 
-const productShema: Schema = new Schema(
-    {
-        product_name: {
-            type: 'string',
-            required: true,
-        },
-        product_description: {
-            type: 'string',
-            required: true,
-        },
-        product_price: {
-            type: 'number',
-            required: true,
-        },
-        product_quantity: {
-            type: 'number',
-            required: true,
-        },
-        category_name: {
-            type: String,
-            ref: 'Categories', 
-          },
-        product_image: {
-            type: 'string',
-            required: false,
-        },
-        product_status: {
-            type: 'string',
-            default: 'active',
-            required: true,
-        },
+const productSchema: Schema = new Schema(
+  {
+    product_name: {
+      type: String,
+      required: true,
     },
-    {
-        timestamps: true
-    }
-)
+    product_description: {
+      type: String,
+      required: true,
+    },
+    product_price: {
+      type: Number,
+      required: true,
+    },
+    product_quantity: {
+      type: Number,
+      required: true,
+    },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: 'Categories', 
+      required: true,
+    },
+    subcategory: {
+      type: Schema.Types.ObjectId,
+      ref: 'Subcategories', 
+      required: true,
+    },
+    product_image: {
+      type: String,
+      required: false,
+    },
+    product_status: {
+      type: String,
+      default: 'active',
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-export default model<IProducts>("Products", productShema)
+export default model<IProducts>('Products', productSchema);
