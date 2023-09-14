@@ -15,9 +15,7 @@ export const getCategories = async (req: Request, res: Response): Promise<void> 
 
 export const getCategoryWithProducts = async (req: Request, res: Response): Promise<void> => {
     try {
-        const categoryId = req.params.categoryId; // Get the category ID from the route params
-
-        // Find the category by ID
+        const categoryId = req.params.categoryId; 
         const category: ICategories | null = await Categories.findById(categoryId).maxTimeMS(3000);
 
         if (!category) {
@@ -28,7 +26,6 @@ export const getCategoryWithProducts = async (req: Request, res: Response): Prom
             return
         }
 
-        // Find products associated with the category using the category's _id
         const products: IProducts[] = await Products.find({ category: category._id }).maxTimeMS(3000);
 
         res.status(200).json({

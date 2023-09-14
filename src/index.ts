@@ -5,6 +5,7 @@ import allRoutes from "./routes/index.routes";
 import dotenv from "dotenv"
 import swaggerUI from "swagger-ui-express";
 import docs from "./docs";
+import { v2 as cloudinary } from "cloudinary";
 
 
 const app: Express = express();
@@ -15,6 +16,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // app.use("/users/add", upload.single("profile_picture"));
+cloudinary.config({
+  cloud_name: 'dqksbyovs', 
+  api_key: '298781338488113', 
+  api_secret: 'qsZBss7xJK8yKMoK_ruktBkFt2o' 
+  });
 
 app.use(allRoutes.helloRoutes);
 app.use(allRoutes.userRoutes);
@@ -24,8 +30,10 @@ app.use(allRoutes.statusRoutes);
 app.use(allRoutes.categoriesRoutes);
 app.use(allRoutes.productsRoutes);
 app.use(allRoutes.subcategoryRoutes);
+app.use(allRoutes.productImageRoutes);
 app.use('/api-docs',swaggerUI.serve,swaggerUI.setup(docs));
- 
+
+
 dotenv.config()
 
 

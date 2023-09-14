@@ -6,6 +6,7 @@ import statusRoutes from "./users/userStatus.routes"
 import categoriesRoutes from "./categories/categories.routes"
 import productsRoutes from "./products/productsCrud.routes"
 import subcategoryRoutes from "./categories/subcategory.routes"
+import productImageRoutes from "./products/productImage.routes"
 
 export default {
     userRoutes,
@@ -15,5 +16,6 @@ export default {
     statusRoutes,
     categoriesRoutes,
     productsRoutes,
-    subcategoryRoutes
+    subcategoryRoutes,
+    productImageRoutes,
 };

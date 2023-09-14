@@ -20,6 +20,14 @@ const productSchema: Schema = new Schema(
       type: Number,
       required: true,
     },
+    product_image: {
+      type: String,
+      required: true
+    },
+    product_vendor:{
+      type: String,
+      required: true
+    },
     category: {
       type: Schema.Types.ObjectId,
       ref: 'Categories', 
@@ -29,10 +37,6 @@ const productSchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Subcategories', 
       required: true,
-    },
-    product_image: {
-      type: String,
-      required: false,
     },
     product_status: {
       type: String,
