@@ -3,6 +3,9 @@ import { IProducts } from '../../types/products'
 import Products from "../../models/products"
 import Categories from "../../models/categories";
 import Subcategories from "../../models/subcategories";
+import productImage from "../../models/productImage";
+import { v2 as cloudinaryV2, UploadApiResponse, UploadStream } from "cloudinary";
+import streamifier from "streamifier";
 
 
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
@@ -14,19 +17,73 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     }
     }
 
+
+    export const getProductsWithImages = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const products: IProducts[] = await Products.find().maxTimeMS(30000);
+            const productsWithImages: IProducts[] = await Promise.all(products.map(async (product: IProducts) => {
+                const productImagesw = await productImage.find({ product: product._id });
+                return {
+                    ...product.toObject(), 
+                    product_images: productImagesw, 
+                };
+            }));
+    
+            res.status(200).json({ products: productsWithImages });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                status: false,
+                message: 'An error occurred while fetching products',
+            });
+        }
+    };
+
+
     export const addProduct = async (req: Request, res: Response): Promise<void> => {
         try {
-            const body = req.body as Pick<IProducts, 'product_name' | 'product_description' | 'product_price' | 'product_quantity' | 'category_name' | 'subcategory_name' | 'product_image' | 'product_status'>;
-            
-            if (!body.product_name || !body.product_description || !body.product_price || !body.product_quantity || !body.category_name || !body.subcategory_name) {
+            const {
+                product_name,
+                product_description,
+                product_price,
+                product_quantity,
+                product_image,
+                product_vendor,
+                category_name,
+                subcategory_name,
+                product_status,
+            } = req.body;
+            const imageFile = req.file;
+    
+            // Check if no image file was uploaded
+            if (!imageFile) {
                 res.status(400).json({
                     status: false,
-                    message: 'Please fill all required fields',
+                    message: 'Please upload an image file',
                 });
                 return;
             }
     
-            const category = await Categories.findOne({ category_name: body.category_name });
+          
+            // if (product_name || product_description || product_price || product_quantity || category_name || subcategory_name) {
+            //     res.status(400).json({
+            //         status: false,
+            //         message: 'Please fill all required fields',
+            //     });
+            //     return;
+            // }
+
+            const result: UploadStream = cloudinaryV2.uploader.upload_stream(
+                { folder: 'product-images' },
+                async (error, cloudinaryResult: any) => {
+                    if (error) {
+                        console.error(error);
+                        res.status(500).json({
+                            status: false,
+                            message: 'An error occurred while uploading the image to Cloudinary',
+                        });
+                     } else{
+            const category = await Categories.findOne({ category_name: category_name });
     
             if (!category) {
                 res.status(404).json({
@@ -37,7 +94,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
             }
     
             const subcategory = await Subcategories.findOne({
-                subcategory_name: body.subcategory_name,
+                subcategory_name: subcategory_name,
                 category: category._id 
             });
     
@@ -48,23 +105,32 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
                 });
                 return;
             }
-    
+        
             const newProduct: IProducts = new Products({
-                product_name: body.product_name,
-                product_description: body.product_description,
-                product_price: body.product_price,
-                product_quantity: body.product_quantity,
+                product_name: product_name,
+                product_description: product_description,
+                product_price: product_price,
+                product_quantity: product_quantity,
                 category: category._id,
                 subcategory: subcategory._id, 
-                product_image: body.product_image,
-                product_status: body.product_status,
+                product_status: product_status,
+                product_image: cloudinaryResult.secure_url,
+                product_vendor: product_vendor
             });
-    
+
             const newProductResult: IProducts = await newProduct.save();
             res.status(201).json({
                 message: 'Product added successfully',
                 product: newProductResult,
             });
+        }})
+
+        
+        if (!result) {
+            throw new Error("Cloudinary upload failed");
+        }
+
+        streamifier.createReadStream(imageFile.buffer).pipe(result);
         } catch (err) {
             console.error(err);
             res.status(500).json({
@@ -72,8 +138,10 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
                 message: 'An error occurred while adding the product',
             });
         }
+        
     };
     
+
 
     export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
         try {
