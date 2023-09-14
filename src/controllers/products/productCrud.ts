@@ -42,8 +42,28 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 
     export const addProduct = async (req: Request, res: Response): Promise<void> => {
         try {
-            const {product_name, product_description, product_price, product_quantity, product_image, product_vendor, category_name, subcategory_name, product_status  } = req.body 
+            const {
+                product_name,
+                product_description,
+                product_price,
+                product_quantity,
+                product_image,
+                product_vendor,
+                category_name,
+                subcategory_name,
+                product_status,
+            } = req.body;
             const imageFile = req.file;
+    
+            // Check if no image file was uploaded
+            if (!imageFile) {
+                res.status(400).json({
+                    status: false,
+                    message: 'Please upload an image file',
+                });
+                return;
+            }
+    
           
             // if (product_name || product_description || product_price || product_quantity || category_name || subcategory_name) {
             //     res.status(400).json({
@@ -52,6 +72,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
             //     });
             //     return;
             // }
+
             const result: UploadStream = cloudinaryV2.uploader.upload_stream(
                 { folder: 'product-images' },
                 async (error, cloudinaryResult: any) => {
@@ -96,21 +117,20 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
                 product_image: cloudinaryResult.secure_url,
                 product_vendor: product_vendor
             });
-    
+
             const newProductResult: IProducts = await newProduct.save();
             res.status(201).json({
                 message: 'Product added successfully',
                 product: newProductResult,
             });
         }})
-        
+
         
         if (!result) {
             throw new Error("Cloudinary upload failed");
         }
 
         streamifier.createReadStream(imageFile.buffer).pipe(result);
-
         } catch (err) {
             console.error(err);
             res.status(500).json({
@@ -118,6 +138,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
                 message: 'An error occurred while adding the product',
             });
         }
+        
     };
     
 
