@@ -1,5 +1,5 @@
 import express, { Express } from "express";
-import mongoose, { ConnectOptions } from "mongoose";
+import mongoose from "mongoose";
 import cors from "cors";
 import allRoutes from "./routes/index.routes";
 import dotenv from "dotenv"
@@ -22,7 +22,6 @@ cloudinary.config({
   api_secret: 'qsZBss7xJK8yKMoK_ruktBkFt2o' 
   });
 
-app.use(allRoutes.helloRoutes);
 app.use(allRoutes.userRoutes);
 app.use(allRoutes.loginRoutes);
 app.use(allRoutes.roleRoutes);
