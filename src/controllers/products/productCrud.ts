@@ -1,8 +1,7 @@
 import { Response, Request } from "express"
 import { IProducts } from '../../types/products'
 import Products from "../../models/products"
-import Categories from "../../models/categories";
-import Subcategories from "../../models/subcategories";
+import Category from "../../models/category";
 import productImage from "../../models/productImage";
 import { v2 as cloudinaryV2, UploadApiResponse, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
@@ -47,11 +46,9 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
                 product_description,
                 product_price,
                 product_quantity,
-                product_image,
                 product_vendor,
-                category_name,
-                subcategory_name,
                 product_status,
+                category_id
             } = req.body;
             const imageFile = req.file;
     
@@ -83,7 +80,13 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
                             message: 'An error occurred while uploading the image to Cloudinary',
                         });
                      } else{
-            const category = await Categories.findOne({ category_name: category_name });
+
+                        console.log("cloudinaryResult", category_id);
+                        
+                        const category = await Category.findOne({ _id: category_id });
+
+            console.log("category", category);
+            
     
             if (!category) {
                 res.status(404).json({
@@ -93,26 +96,13 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
                 return;
             }
     
-            const subcategory = await Subcategories.findOne({
-                subcategory_name: subcategory_name,
-                category: category._id 
-            });
-    
-            if (!subcategory) {
-                res.status(404).json({
-                    status: false,
-                    message: 'Subcategory not found in the selected category',
-                });
-                return;
-            }
         
             const newProduct: IProducts = new Products({
                 product_name: product_name,
                 product_description: product_description,
                 product_price: product_price,
                 product_quantity: product_quantity,
-                category: category._id,
-                subcategory: subcategory._id, 
+                category: category,
                 product_status: product_status,
                 product_image: cloudinaryResult.secure_url,
                 product_vendor: product_vendor
