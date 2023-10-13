@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { ICategory } from "./category";
+import { IShop } from "./shop";
 
 export interface IProducts extends Document {
     toObject(): any;
@@ -8,9 +9,7 @@ export interface IProducts extends Document {
     product_name: string;
     product_description: string;
     product_price: number;
-    product_quantity: number;
     category: Types.ObjectId | ICategory;
+    vendor:Types.ObjectId | IShop;
     product_image: string;
-    product_vendor: string,
-    product_status: string;
 }

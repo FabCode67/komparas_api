@@ -1,6 +1,6 @@
 import { Schema, model, Document } from 'mongoose';
-import { ICategory } from '../types/category';
 import { IProducts } from '../types/products';
+
 
 const productSchema = new Schema<IProducts>({
     product_name: {
@@ -15,26 +15,18 @@ const productSchema = new Schema<IProducts>({
         type: Number,
         required: true,
     },
-    product_quantity: {
-        type: Number,
-        required: true,
-    },
     product_image: {
         type: String,
         required: true,
     },
-    product_vendor: {
-        type: String,
+    vendor: {
+        type: Schema.Types.ObjectId,
+        ref:'Shop',
         required: true,
     },
     category: {
         type: Schema.Types.ObjectId,
-        ref: 'Category', // Reference to the Category model
-        required: true,
-    },
-    product_status: {
-        type: String,
-        default: 'active',
+        ref: 'Category',
         required: true,
     },
 }, {

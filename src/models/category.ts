@@ -1,11 +1,10 @@
 import { Schema, model, Document } from 'mongoose';
 import { ICategory } from '../types/category';
 
-
 const CategorySchema = new Schema<ICategory>({
-    name: { type: String, required: true, unique: true},
+    name: { type: String, required: true, unique: true },
     parent_id: { type: String, default: null },
-});
+}, { timestamps: true });
 
 const Category = model<ICategory>('Category', CategorySchema);
 
