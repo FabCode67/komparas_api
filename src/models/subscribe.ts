@@ -1,10 +1,12 @@
 import { Schema, model, Document } from 'mongoose';
 import {ISubscribe} from '../types/subscribe';
 
-const CategorySchema = new Schema<ISubscribe>({
-    email: { type: String, required: true, unique: true },
+const SubsSchema = new Schema<ISubscribe>({
+    email: { type: String, required: true },
+    confirmed: {type: Boolean, required: true, default: false},
+    token: {type: String, required: true}
 }, { timestamps: true });
 
-const Category = model<ISubscribe>('Subs', CategorySchema);
+const Subs = model<ISubscribe>('Subs', SubsSchema);
 
-export default Category;
+export default Subs;
