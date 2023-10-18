@@ -10,7 +10,22 @@ import { v2 as cloudinary } from "cloudinary";
 
 const app: Express = express();
 const PORT: string | number = process.env.PORT || 8080;
-app.use(cors());
+const corsOpts = {
+  origin: '*',
+  
+  methods: [
+  'GET',
+  'POST',
+  'DELETE',
+  'PATCH'
+  ],
+  
+  allowedHeaders: [
+  'Content-Type',
+  'Authorization',
+  ],
+  };
+app.use(cors(corsOpts));
 
 
 app.use(express.json());
