@@ -110,7 +110,7 @@ const subscribeController = async (req: Request, res: Response) => {
                 <p style="font-weight: bolder;font-size: 18px; 
                     letter-spacing: 0.025em; 
                     color:black;"> 
-                  Hello <i style="font-weight: normal; font-size:10">${email}</i>! 
+                    Salut <i style="font-weight: normal; font-size:10">${email}</i>! 
                   <br> Nous sommes ravis de vous compter à bord. Restez à l'écoute des dernières mises à jour et actualités. 
                   <h1>Veuillez confirmer votre email ici👉👉 <a href=${confirmationLink}>CONFIRMER</a></h1>
                 </p> 
@@ -205,15 +205,15 @@ const subscribeController = async (req: Request, res: Response) => {
       <a href="#"
       target="_blank"
       style="color:#999999; 
-          text-decoration:underline;">PRIVACY STATEMENT</a> 
+          text-decoration:underline;">DÉCLARATION DE CONFIDENTIALITÉ</a> 
           | <a href="#" target="_blank"
-          style="color:#999999; text-decoration:underline;">TERMS OF SERVICE</a> 
+          style="color:#999999; text-decoration:underline;">CONDITIONS D'UTILISATION</a> 
           | <a href="#"
           target="_blank"
-          style="color:#999999; text-decoration:underline;">RETURNS</a><br> 
-              © 2022 creativa poeta. All Rights Reserved.<br> 
-              If you do not wish to receive any further 
-              emails from us, please 
+          style="color:#999999; text-decoration:underline;">RETOUR</a><br> 
+              © 2022 creativa poeta. Tous droits réservés.<br> 
+              Si vous ne souhaitez plus recevoir
+              emails de notre part, s'il vous plaît
               <a href="#"
               target="_blank"
               style="text-decoration:none; 
