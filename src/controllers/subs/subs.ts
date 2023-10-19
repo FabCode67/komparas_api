@@ -31,20 +31,20 @@ const confirmationController = async (req: Request, res: Response) => {
     const subscriber = await Subs.findOne({ token });
 
     if (!subscriber) {
-      return res.status(404).json({ error: 'Subscriber not found' });
+      return res.status(404).json({ error: "Votre abonnement n'est pas valide, veuillez vous réabonner!" });
     }
 
     if (subscriber.confirmed) {
-      return res.status(200).json({ message: 'Votre abonnement est déjà confirmé ; restez en contact avec nous' });
+      return res.status(200).json({ message: 'Votre abonnement est déjà confirmé ; restez en contact avec nous!' });
     }
 
     subscriber.confirmed = true;
     await subscriber.save();
 
-    return res.status(200).json({ message: "Votre abonnement a été confirmé. Merci d'avoir choisi de travailler avec nous" });
+    return res.status(200).json({ message: "Votre abonnement a été confirmé. Merci d'avoir choisi de travailler avec nous!" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Opps, réessayez.' });
   }
 };
 
