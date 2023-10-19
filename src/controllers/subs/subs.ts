@@ -34,7 +34,10 @@ const confirmationController = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Subscriber not found' });
     }
 
-    // Save the subscriber as confirmed
+    if (subscriber.confirmed) {
+      return res.status(200).json({ message: 'Subscription is already confirmed' });
+    }
+
     subscriber.confirmed = true;
     await subscriber.save();
 
@@ -44,6 +47,7 @@ const confirmationController = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 export { confirmationController };
 const subscribeController = async (req: Request, res: Response) => {
@@ -236,10 +240,7 @@ const subscribeController = async (req: Request, res: Response) => {
       
   `,
     };
-
-
     await transporter.sendMail(mailOptions);
-
     return res.json({ message: 'Subscribed successfully' });
   } catch (error) {
     console.log(error);

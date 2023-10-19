@@ -17,7 +17,8 @@ const corsOpts = {
   'GET',
   'POST',
   'DELETE',
-  'PATCH'
+  'PATCH',
+  'PUT'
   ],
   
   allowedHeaders: [
