@@ -35,13 +35,13 @@ const confirmationController = async (req: Request, res: Response) => {
     }
 
     if (subscriber.confirmed) {
-      return res.status(200).json({ message: 'Subscription is already confirmed' });
+      return res.status(200).json({ message: 'Votre abonnement est déjà confirmé ; restez en contact avec nous' });
     }
 
     subscriber.confirmed = true;
     await subscriber.save();
 
-    return res.status(200).json({ message: 'Subscription confirmed' });
+    return res.status(200).json({ message: "Votre abonnement a été confirmé. Merci d'avoir choisi de travailler avec nous" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: 'Internal server error' });
