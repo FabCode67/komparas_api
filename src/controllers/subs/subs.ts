@@ -50,6 +50,18 @@ const confirmationController = async (req: Request, res: Response) => {
 
 
 export { confirmationController };
+
+const getAllSubscribers = async (req: Request, res: Response) => {
+  try {
+    const subscribers = await Subs.find();
+    res.json(subscribers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export { getAllSubscribers };
 const subscribeController = async (req: Request, res: Response) => {
   const { email } = req.body;
   if (!email) {
