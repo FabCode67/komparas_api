@@ -57,6 +57,11 @@ const subscribeController = async (req: Request, res: Response) => {
   }
 
   try {
+    const existingSubscriber = await Subs.findOne({ email });
+
+    if (existingSubscriber) {
+      return res.status(400).json({ error: 'Cet e-mail est déjà abonné. Veuillez utiliser une adresse e-mail différente.' });
+    }
 
     const token = uuidv4();
     const subscriber = new Subs({ email, token });
