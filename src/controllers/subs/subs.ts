@@ -58,7 +58,7 @@ const subscribeController = async (req: Request, res: Response) => {
     const subscriber = new Subs({ email, token });
     await subscriber.save();
 
-    const confirmationLink = `https://develop--brilliant-lolly-1205b8.netlify.app/?token=${token}`; // Replace 'example.com' with your domain
+    const confirmationLink = `https://develop--brilliant-lolly-1205b8.netlify.app/confirm/token=${token}`; // Replace 'example.com' with your domain
 
     // const subscriber = new Subs({ email });
     // await subscriber.save();
