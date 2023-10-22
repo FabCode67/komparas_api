@@ -3,7 +3,7 @@ import { IContact } from '../types/contact';
 
 const ContactSchema = new Schema<IContact>({
     name: { type: String, required: true},
-    email: { type: String, default: null, required: true, unique: true },
+    email: { type: String, required: true},
     message: { type: String, required: true },
 }, { timestamps: true });
 
