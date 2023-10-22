@@ -43,7 +43,6 @@ const confirmationController = async (req: Request, res: Response) => {
 
     return res.status(200).json({ message: "Votre abonnement a été confirmé. Merci d'avoir choisi de travailler avec nous!" });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ error: 'Opps, réessayez.' });
   }
 };
@@ -81,11 +80,7 @@ const subscribeController = async (req: Request, res: Response) => {
     const subscriber = new Subs({ email, token });
     await subscriber.save();
 
-    const confirmationLink = `https://develop--brilliant-lolly-1205b8.netlify.app/?token=${token}`; // Replace 'example.com' with your domain
-
-    // const subscriber = new Subs({ email });
-    // await subscriber.save();
-
+    const confirmationLink = `https://develop--brilliant-lolly-1205b8.netlify.app/?token=${token}`; 
     const mailOptions = {
       from: 'mwanafunzifabrice@gmail.com',
       to: email,
@@ -262,8 +257,6 @@ const subscribeController = async (req: Request, res: Response) => {
     await transporter.sendMail(mailOptions);
     return res.json({ message: 'Subscribed successfully' });
   } catch (error) {
-    console.log(error);
-
     return res.status(500).json({ error: 'Internal server error' });
   }
 };

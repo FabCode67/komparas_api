@@ -33,8 +33,6 @@ export const addProductImage = async (req: Request, res: Response): Promise<void
                         product_image: cloudinaryResult.secure_url,
                     });
 
-                    console.log("New Product Image:", newProductImage);
-
                     const newProductImageResult: IProductImage = await newProductImage.save();
                     res.status(201).json({
                         message: 'Product image added successfully',
