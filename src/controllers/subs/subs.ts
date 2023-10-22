@@ -62,10 +62,12 @@ const getAllSubscribers = async (req: Request, res: Response) => {
 };
 
 export { getAllSubscribers };
+
+
 const subscribeController = async (req: Request, res: Response) => {
   const { email } = req.body;
   if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
+    return res.status(400).json({ error: "L'e-mail est requis" });
   }
 
   try {
