@@ -9,6 +9,7 @@ import {
     updateUser, 
     deleteUser
  } from "../../controllers/Users/userCrud.controler";
+ import { sendMessage, getMessages } from "../../controllers/Users/contact";
  import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
 
 const router : Router = Router()
@@ -19,6 +20,8 @@ router.put("/users/update/:id", updateUser)
 router.delete("/users/delete/:id", authenticat, deleteUser)
 router.get("/users/:id", getUserById)
 router.get("/users/email/:email", getUserByEmail)
+router.post("/users/contact", sendMessage)
+router.get("/messages", getMessages)
 
 export default router
 
