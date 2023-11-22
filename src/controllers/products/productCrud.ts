@@ -41,24 +41,18 @@ export const getProductsWithImages = async (req: Request, res: Response): Promis
 
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {
-            product_name,
-            product_description,
-            product_price,
-            category_id,
-            vendor_id,
-        } = req.body;
+        const { product_name, product_description, product_price, category_name, vendor_id } = req.body;
         const imageFile = req.file;
-
+    
         // Check if no image file was uploaded
         if (!imageFile) {
-            res.status(400).json({
-                status: false,
-                message: 'Please upload an image file',
-            });
-            return;
+          res.status(400).json({
+            status: false,
+            message: 'Please upload an image file',
+          });
+          return;
         }
-
+    
 
         const result: UploadStream = cloudinaryV2.uploader.upload_stream(
             { folder: 'product-images' },
@@ -71,8 +65,16 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
                     });
                 } else {
 
-                    const category = await Category.findOne({ _id: category_id });
-                    const vendor = await Shop.findOne({ _id: vendor_id })
+                    const category = await Category.findOne({ name: category_name });
+
+                    if (!category) {
+                      res.status(404).json({
+                        status: false,
+                        message: 'Category not found',
+                      });
+                      return;
+                    }
+                              const vendor = await Shop.findOne({ _id: vendor_id })
                     const vendors = await Shop.find()
 
                     if (!category) {
@@ -96,10 +98,11 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
                         product_name: product_name,
                         product_description: product_description,
                         product_price: product_price,
-                        category: category,
+                        category: category._id,
                         product_image: cloudinaryResult.secure_url,
-                        vendor: vendor
-                    });
+                        vendor: vendor,
+                      });
+            
 
                     const newProductResult: IProducts = await newProduct.save();
                     res.status(201).json({
