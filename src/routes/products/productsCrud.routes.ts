@@ -6,7 +6,8 @@ import {
     deleteProduct,
     updateProduct,
     getProductById,
-    getProductsWithImages
+    getProductsWithImages,
+    getProductsByCategory
 } from "../../controllers/products/productCrud";
 import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
 import multer from "multer";
@@ -23,6 +24,8 @@ router.get("/products/:productId", getProductById)
 router.post("/products",upload.single('product_image'), addProduct)
 router.delete("/products/:productId",isAdminAuthenticat, deleteProduct)
 router.put("/products/:productId", isAdminAuthenticat, updateProduct)
+router.get('/products/:category_id', getProductsByCategory);
+router.get('/products/category/:category_name', getProductsByCategory);
 
 
 export default router

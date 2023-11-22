@@ -213,3 +213,44 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
         });
     }
 };
+
+
+export const getProductsByCategory = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { category_id, category_name } = req.params;
+  
+      let categoryQuery;
+  
+      if (category_id) {
+        categoryQuery = { _id: category_id };
+      } else if (category_name) {
+        categoryQuery = { name: category_name };
+      } else {
+        res.status(400).json({
+          status: false,
+          message: 'Please provide a category ID or name',
+        });
+        return;
+      }
+  
+      const category = await Category.findOne(categoryQuery);
+  
+      if (!category) {
+        res.status(404).json({
+          status: false,
+          message: 'Category not found',
+        });
+        return;
+      }
+  
+      const products: IProducts[] = await Products.find({ category: category._id });
+  
+      res.status(200).json({ products });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        status: false,
+        message: 'An error occurred while fetching products by category',
+      });
+    }
+  };
