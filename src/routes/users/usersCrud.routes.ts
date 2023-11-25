@@ -15,7 +15,7 @@ import {
 const router : Router = Router()
 
 router.get("/users", getUsers)
-router.post("/users/add",  addUser);
+router.post("/users/add", upload.single('profile_picture'), addUser);
 router.put("/users/update/:id", updateUser)
 router.delete("/users/delete/:id", authenticat, deleteUser)
 router.get("/users/:id", getUserById)

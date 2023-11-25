@@ -2,6 +2,102 @@ import { Response, Request } from "express";
 import { IUser } from "../../types/users";
 import Users from "../../models/users";
 import { isValidEmail } from "../../middleware/emailValidity";
+import { v2 as cloudinaryV2, UploadApiResponse, UploadStream } from "cloudinary";
+import streamifier from "streamifier";
+
+export const addUser = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const body = req.body as Pick<IUser, "first_name" | "last_name" | "email" | "password" | "confirm_password" | "role">;
+        const imageFile = req.file;
+
+        if (!body.first_name || !body.last_name || !body.email || !body.password || !body.confirm_password || !body.role || !imageFile) {
+            res.status(400).json({
+                status: false,
+                message: "Please fill all fields and upload an image file",
+            });
+            return;
+        }
+
+        if (body.password !== body.confirm_password) {
+            res.status(400).json({
+                status: false,
+                message: "Password does not match",
+            });
+            return;
+        }
+
+        if (body.password.length < 6) {
+            res.status(400).json({
+                status: false,
+                message: "Password must be at least 6 characters",
+            });
+            return;
+        }
+
+        if (!isValidEmail(body.email)) {
+            res.status(400).json({
+                status: false,
+                message: "Invalid email address",
+            });
+            return;
+        }
+
+        const existingUser = await Users.findOne({ email: body.email });
+
+        if (existingUser) {
+            res.status(409).json({
+                status: false,
+                message: "Email already registered",
+            });
+            return;
+        }
+
+        const result: UploadStream = cloudinaryV2.uploader.upload_stream(
+            { folder: 'user-profile-images' },
+            async (error: any, cloudinaryResult: UploadApiResponse | undefined) => {
+                if (error) {
+                    console.error(error);
+                    res.status(500).json({
+                        status: false,
+                        message: 'An error occurred while uploading the image to Cloudinary',
+                    });
+                } else {
+                    const newUser: IUser = new Users({
+                        first_name: body.first_name,
+                        last_name: body.last_name,
+                        email: body.email,
+                        password: body.password,
+                        confirm_password: body.confirm_password,
+                        role: body.role,
+                        status: "enabled",
+                        profile_picture: cloudinaryResult ? cloudinaryResult.secure_url : undefined,
+                    });
+
+                    const newUsers: IUser = await newUser.save();
+                    const allUsers: IUser[] = await Users.find();
+
+                    res.status(201).json({
+                        message: 'User added successfully',
+                        user: newUsers,
+                        users: allUsers,
+                    });
+                }
+            }
+        );
+
+        if (!result) {
+            throw new Error("Cloudinary upload failed");
+        }
+
+        streamifier.createReadStream(imageFile.buffer).pipe(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            status: false,
+            message: 'An error occurred while adding the user',
+        });
+    }
+};
 
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -11,71 +107,6 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
         throw error
     }
     }
-
-
-
-    export const addUser = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const body = req.body as Pick<IUser, "first_name" | "last_name" | "email" | "password" | "confirm_password" | "role" >
-            if (!body.first_name || !body.last_name || !body.email || !body.password || !body.confirm_password || !body.role) {
-                res.status(401).json({
-                    status: false,
-                    message: "Please fill all fields"
-                });
-                return;
-            }
-            if (body.password !== body.confirm_password) {
-                res.status(401).json({
-                    status: false,
-                    message: "Password does not match"
-                });
-                return;
-            }
-    
-            if (body.password.length < 6) {
-                res.status(401).json({
-                    status: false,
-                    message: "Password must be at least 6 characters"
-                });
-                return;
-            }
-    
-            if (!isValidEmail(body.email)) {
-                res.status(401).json({
-                    status: false,
-                    message: "Invalid email address"
-                });
-                return;
-            }
-            const existingUser = await Users.findOne({ email: body.email });
-            if (existingUser) {
-                res.status(409).json({
-                    status: false,
-                    message: "Email already registered"
-                });
-                return;
-            }
-    
-            const newUser: IUser = new Users({
-                first_name: body.first_name,
-                last_name: body.last_name,
-                email: body.email,
-                password: body.password,
-                confirm_password: body.confirm_password,
-                role: body.role,
-                status: "enabled"            
-            });
-            const newUsers: IUser = await newUser.save();
-            const allUsers: IUser[] = await Users.find();
-    
-            res
-                .status(201)
-                .json({ message: "User added", user: newUsers, users: allUsers });
-        } catch (error) {
-            throw error;
-        }
-    };
-    
 
 export const updateUser = async (req: Request, res: Response): Promise<void> => {
     try{
