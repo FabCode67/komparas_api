@@ -54,7 +54,7 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
 
         const result: UploadStream = cloudinaryV2.uploader.upload_stream(
             { folder: 'user-profile-images' },
-            async (error: any, cloudinaryResult: UploadApiResponse | undefined) => {
+            (error: any, cloudinaryResult: UploadApiResponse | undefined) => {
                 if (error) {
                     console.error(error);
                     res.status(500).json({
@@ -73,14 +73,31 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
                         profile_picture: cloudinaryResult ? cloudinaryResult.secure_url : undefined,
                     });
 
-                    const newUsers: IUser = await newUser.save();
-                    const allUsers: IUser[] = await Users.find();
-
-                    res.status(201).json({
-                        message: 'User added successfully',
-                        user: newUsers,
-                        users: allUsers,
-                    });
+                    newUser.save()
+                        .then((newUser: IUser) => {
+                            Users.find()
+                                .then((allUsers: IUser[]) => {
+                                    res.status(201).json({
+                                        message: 'User added successfully',
+                                        user: newUser,
+                                        users: allUsers,
+                                    });
+                                })
+                                .catch((err) => {
+                                    console.error(err);
+                                    res.status(500).json({
+                                        status: false,
+                                        message: 'An error occurred while fetching all users',
+                                    });
+                                });
+                        })
+                        .catch((err) => {
+                            console.error(err);
+                            res.status(500).json({
+                                status: false,
+                                message: 'An error occurred while saving the user',
+                            });
+                        });
                 }
             }
         );
@@ -89,7 +106,14 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
             throw new Error("Cloudinary upload failed");
         }
 
-        streamifier.createReadStream(imageFile.buffer).pipe(result);
+        if (imageFile && imageFile.buffer) {
+            streamifier.createReadStream(imageFile.buffer).pipe(result);
+        } else {
+            res.status(400).json({
+                status: false,
+                message: 'No image buffer provided',
+            });
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({
