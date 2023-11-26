@@ -36,7 +36,15 @@ const userSchema: Schema = new Schema(
         profile_picture: {
             type: String,
             required: false
-        }
+        },
+        resetToken: {
+            type: String,
+            default: null,
+          },
+          resetTokenExpiry: {
+            type: Number,
+            default: null,
+          },
     },
     { timestamps: true }
 )

@@ -4,6 +4,8 @@ import Users from "../../models/users";
 import { isValidEmail } from "../../middleware/emailValidity";
 import { v2 as cloudinaryV2, UploadApiResponse, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
+import bcrypt  from 'bcrypt'
+
 
 export const addUser = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -71,12 +73,13 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
                         });
                         return;
                     }
+                    const hashedPassword = await bcrypt.hash(password, 10);
 
                     const newUser: IUser = new Users({
                         first_name: first_name,
                         last_name: last_name,
                         email: email,
-                        password: password,
+                        password: hashedPassword,
                         confirm_password: confirm_password,
                         role: role,
                         status: "enabled",
