@@ -31,6 +31,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             last_name: user.last_name,
             email: user.email,
             role: user.role, 
+            profile_picture: user.profile_picture,
         };
 
         const token = jwt.sign(payload, process.env.TOKEN_SECRET as string, {
