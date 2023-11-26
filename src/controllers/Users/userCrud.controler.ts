@@ -7,54 +7,19 @@ import streamifier from "streamifier";
 
 export const addUser = async (req: Request, res: Response): Promise<void> => {
     try {
-        const body = req.body as Pick<IUser, "first_name" | "last_name" | "email" | "password" | "confirm_password" | "role">;
+
+        const { first_name, last_name, email, password, confirm_password, role } = req.body;
         const imageFile = req.file;
-
-        if (!body.first_name || !body.last_name || !body.email || !body.password || !body.confirm_password || !body.role || !imageFile) {
+        if (!imageFile) {
             res.status(400).json({
-                status: false,
-                message: "Please fill all fields and upload an image file",
+              status: false,
+              message: 'Please upload an image file',
             });
             return;
-        }
-
-        if (body.password !== body.confirm_password) {
-            res.status(400).json({
-                status: false,
-                message: "Password does not match",
-            });
-            return;
-        }
-
-        if (body.password.length < 6) {
-            res.status(400).json({
-                status: false,
-                message: "Password must be at least 6 characters",
-            });
-            return;
-        }
-
-        if (!isValidEmail(body.email)) {
-            res.status(400).json({
-                status: false,
-                message: "Invalid email address",
-            });
-            return;
-        }
-
-        const existingUser = await Users.findOne({ email: body.email });
-
-        if (existingUser) {
-            res.status(409).json({
-                status: false,
-                message: "Email already registered",
-            });
-            return;
-        }
-
+          }
         const result: UploadStream = cloudinaryV2.uploader.upload_stream(
-            { folder: 'user-profile-images' },
-            (error: any, cloudinaryResult: UploadApiResponse | undefined) => {
+            { folder: 'product-image' },
+            async (error, cloudinaryResult: any) => {
                 if (error) {
                     console.error(error);
                     res.status(500).json({
@@ -62,58 +27,76 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
                         message: 'An error occurred while uploading the image to Cloudinary',
                     });
                 } else {
+
+                    if (!first_name || !last_name || !email || !password || !confirm_password || !role || !imageFile) {
+                        console.log("========================",first_name);
+                        
+                        res.status(400).json({
+                            status: false,
+                            message: "Please fill all fields and upload an image file",
+                        });
+                        return;
+                    }
+            
+                    if (password !== confirm_password) {
+                        res.status(400).json({
+                            status: false,
+                            message: "Password does not match",
+                        });
+                        return;
+                    }
+            
+                    if (password.length < 6) {
+                        res.status(400).json({
+                            status: false,
+                            message: "Password must be at least 6 characters",
+                        });
+                        return;
+                    }
+            
+                    if (!isValidEmail(email)) {
+                        res.status(400).json({
+                            status: false,
+                            message: "Invalid email address",
+                        });
+                        return;
+                    }
+            
+                    const existingUser = await Users.findOne({ email: email });
+            
+                    if (existingUser) {
+                        res.status(409).json({
+                            status: false,
+                            message: "Email already registered",
+                        });
+                        return;
+                    }
+
                     const newUser: IUser = new Users({
-                        first_name: body.first_name,
-                        last_name: body.last_name,
-                        email: body.email,
-                        password: body.password,
-                        confirm_password: body.confirm_password,
-                        role: body.role,
+                        first_name: first_name,
+                        last_name: last_name,
+                        email: email,
+                        password: password,
+                        confirm_password: confirm_password,
+                        role: role,
                         status: "enabled",
-                        profile_picture: cloudinaryResult ? cloudinaryResult.secure_url : undefined,
+                        profile_picture: cloudinaryResult.secure_url as String,
                     });
 
-                    newUser.save()
-                        .then((newUser: IUser) => {
-                            Users.find()
-                                .then((allUsers: IUser[]) => {
-                                    res.status(201).json({
-                                        message: 'User added successfully',
-                                        user: newUser,
-                                        users: allUsers,
-                                    });
-                                })
-                                .catch((err) => {
-                                    console.error(err);
-                                    res.status(500).json({
-                                        status: false,
-                                        message: 'An error occurred while fetching all users',
-                                    });
-                                });
-                        })
-                        .catch((err) => {
-                            console.error(err);
-                            res.status(500).json({
-                                status: false,
-                                message: 'An error occurred while saving the user',
-                            });
-                        });
+                    const savedUser: IUser = await newUser.save();
+                    res.status(201).json({
+                        message: 'User added successfully',
+                        user: savedUser,
+                    });
                 }
-            }
-        );
-
+            })
+       
         if (!result) {
             throw new Error("Cloudinary upload failed");
         }
 
-        if (imageFile && imageFile.buffer) {
-            streamifier.createReadStream(imageFile.buffer).pipe(result);
-        } else {
-            res.status(400).json({
-                status: false,
-                message: 'No image buffer provided',
-            });
-        }
+        streamifier.createReadStream(imageFile.buffer).pipe(result);
+
     } catch (error) {
         console.error(error);
         res.status(500).json({
@@ -121,7 +104,8 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
             message: 'An error occurred while adding the user',
         });
     }
-};
+}
+
 
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
     try {

@@ -1,5 +1,4 @@
 import { Router } from "express";
-import upload from "../../handlers/multer";
 
 import { 
     getUsers, 
@@ -11,8 +10,13 @@ import {
  } from "../../controllers/Users/userCrud.controler";
  import { sendMessage, getMessages } from "../../controllers/Users/contact";
  import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
+ import multer from "multer";
 
-const router : Router = Router()
+ const storage = multer.memoryStorage();
+ 
+ const upload = multer({ storage });
+ 
+ const router : Router = Router()
 
 router.get("/users", getUsers)
 router.post("/users/add", upload.single('profile_picture'), addUser);
