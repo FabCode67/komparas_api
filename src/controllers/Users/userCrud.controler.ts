@@ -20,6 +20,43 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
+        if (!isValidEmail(email)) {
+            res.status(400).json({
+                status: false,
+                message: "Invalid email address",
+            });
+            return;
+        }
+
+        if (password !== confirm_password) {
+            res.status(400).json({
+                status: false,
+                message: "Passwords do not match",
+            });
+            return;
+        }
+
+        if(password.length < 8) {
+            res.status(400).json({
+                status: false,
+                message: "Password must be at least 8 characters long",
+            });
+            return;
+        }
+
+        // Check if user with the same email already exists
+
+        const existingUser: IUser | null = await Users.findOne({ email: email });
+        if (existingUser) {
+            res.status(400).json({
+                status: false,
+                message: "User with this email already exists",
+            });
+            return;
+        }
+
+        
+
         // If an image file is provided, handle the upload
         if (imageFile) {
             const result: UploadStream = cloudinaryV2.uploader.upload_stream(
