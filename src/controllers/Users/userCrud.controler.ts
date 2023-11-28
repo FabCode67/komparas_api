@@ -4,101 +4,82 @@ import Users from "../../models/users";
 import { isValidEmail } from "../../middleware/emailValidity";
 import { v2 as cloudinaryV2, UploadApiResponse, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
-import bcrypt  from 'bcrypt'
-
+import bcrypt from 'bcrypt';
 
 export const addUser = async (req: Request, res: Response): Promise<void> => {
     try {
-
         const { first_name, last_name, email, password, confirm_password, role } = req.body;
         const imageFile = req.file;
-        if (!imageFile) {
+
+        // Check if at least one of the required fields is present
+        if (!first_name || !last_name || !email || !password || !confirm_password || !role) {
             res.status(400).json({
-              status: false,
-              message: 'Please upload an image file',
+                status: false,
+                message: "Please fill all required fields",
             });
             return;
-          }
-        const result: UploadStream = cloudinaryV2.uploader.upload_stream(
-            { folder: 'product-image' },
-            async (error, cloudinaryResult: any) => {
-                if (error) {
-                    console.error(error);
-                    res.status(500).json({
-                        status: false,
-                        message: 'An error occurred while uploading the image to Cloudinary',
-                    });
-                } else {
-
-                    if (!first_name || !last_name || !email || !password || !confirm_password || !role || !imageFile) {
-                        console.log("========================",first_name);
-                        
-                        res.status(400).json({
-                            status: false,
-                            message: "Please fill all fields and upload an image file",
-                        });
-                        return;
-                    }
-            
-                    if (password !== confirm_password) {
-                        res.status(400).json({
-                            status: false,
-                            message: "Password does not match",
-                        });
-                        return;
-                    }
-            
-                    if (password.length < 6) {
-                        res.status(400).json({
-                            status: false,
-                            message: "Password must be at least 6 characters",
-                        });
-                        return;
-                    }
-            
-                    if (!isValidEmail(email)) {
-                        res.status(400).json({
-                            status: false,
-                            message: "Invalid email address",
-                        });
-                        return;
-                    }
-            
-                    const existingUser = await Users.findOne({ email: email });
-            
-                    if (existingUser) {
-                        res.status(409).json({
-                            status: false,
-                            message: "Email already registered",
-                        });
-                        return;
-                    }
-                    const hashedPassword = await bcrypt.hash(password, 10);
-
-                    const newUser: IUser = new Users({
-                        first_name: first_name,
-                        last_name: last_name,
-                        email: email,
-                        password: hashedPassword,
-                        confirm_password: confirm_password,
-                        role: role,
-                        status: "enabled",
-                        profile_picture: cloudinaryResult.secure_url as String,
-                    });
-
-                    const savedUser: IUser = await newUser.save();
-                    res.status(201).json({
-                        message: 'User added successfully',
-                        user: savedUser,
-                    });
-                }
-            })
-       
-        if (!result) {
-            throw new Error("Cloudinary upload failed");
         }
 
-        streamifier.createReadStream(imageFile.buffer).pipe(result);
+        // If an image file is provided, handle the upload
+        if (imageFile) {
+            const result: UploadStream = cloudinaryV2.uploader.upload_stream(
+                { folder: 'product-image' },
+                async (error, cloudinaryResult: any) => {
+                    if (error) {
+                        console.error(error);
+                        res.status(500).json({
+                            status: false,
+                            message: 'An error occurred while uploading the image to Cloudinary',
+                        });
+                    } else {
+                        // Rest of your code for validation and user creation with profile picture
+                        const hashedPassword = await bcrypt.hash(password, 10);
+
+                        const newUser: IUser = new Users({
+                            first_name: first_name,
+                            last_name: last_name,
+                            email: email,
+                            password: hashedPassword,
+                            confirm_password: confirm_password,
+                            role: role,
+                            status: "enabled",
+                            profile_picture: cloudinaryResult.secure_url as string,
+                        });
+
+                        const savedUser: IUser = await newUser.save();
+                        res.status(201).json({
+                            message: 'User added successfully',
+                            user: savedUser,
+                        });
+                    }
+                }
+            );
+
+            if (!result) {
+                throw new Error("Cloudinary upload failed");
+            }
+
+            streamifier.createReadStream(imageFile.buffer).pipe(result);
+        } else {
+            // If no image file is provided, create user without profile picture
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            const newUser: IUser = new Users({
+                first_name: first_name,
+                last_name: last_name,
+                email: email,
+                password: hashedPassword,
+                confirm_password: confirm_password,
+                role: role,
+                status: "enabled",
+            });
+
+            const savedUser: IUser = await newUser.save();
+            res.status(201).json({
+                message: 'User added successfully',
+                user: savedUser,
+            });
+        }
 
     } catch (error) {
         console.error(error);
@@ -107,7 +88,7 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
             message: 'An error occurred while adding the user',
         });
     }
-}
+};
 
 
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
