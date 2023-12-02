@@ -37,7 +37,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
         { resetToken, resetTokenExpiry }
     );
 
-    const confirmUrl = `https://curious-kitten-7438aa.netlify.app/reset_password?${resetToken}`;
+    const confirmUrl = `https://curious-kitten-7438aa.netlify.app?resetToken=${resetToken}`;
 
     const mailOptions = {
         from: 'mwanafunzifabrice@gmail.com',
