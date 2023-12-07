@@ -38,6 +38,38 @@ export const getProductsWithImages = async (req: Request, res: Response): Promis
     }
 };
 
+export const getSingleProductWithImages = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const productId = req.params.productId;
+        const product: IProducts | null = await Products.findById(productId);
+
+        if (!product) {
+            res.status(404).json({
+                status: false,
+                message: 'Product not found',
+            });
+            return;
+        }
+
+        const productImages = await productImage.find({ product: product._id });
+
+        res.status(200).json({
+            status: true,
+            product: {
+                ...product.toObject(),
+                product_images: productImages,
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            status: false,
+            message: 'An error occurred while fetching the product',
+        });
+    }
+};
+
+
 
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
     try {
