@@ -54,3 +54,30 @@ export const addProductImage = async (req: Request, res: Response): Promise<void
         });
     }
 };
+
+export const deleteProductImage = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { product_id, product_image_id } = req.params;
+
+        if (!product_id || !product_image_id) {
+            res.status(400).json({
+                status: false,
+                message: 'Please provide product_id and product_image_id',
+            });
+            return;
+        }
+
+        const deletedProductImage = await ProductImages.findByIdAndDelete(product_image_id);
+
+        res.status(200).json({
+            message: 'Product image deleted successfully',
+            productImage: deletedProductImage,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: false,
+            message: 'An error occurred while deleting the product image',
+        });
+    }
+}
