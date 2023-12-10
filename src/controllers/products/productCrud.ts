@@ -42,7 +42,7 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
     try {
         const productId = req.params.productId;
         const product: IProducts | null = await Products.findById(productId);
-
+    
         if (!product) {
             res.status(404).json({
                 status: false,
@@ -52,12 +52,13 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
         }
 
         const productImages = await productImage.find({ product: product._id });
-
+        const productCategory = await Category.findById(product.category);
         res.status(200).json({
             status: true,
             product: {
                 ...product.toObject(),
                 product_images: productImages,
+                category: productCategory,
             },
         });
     } catch (error) {
