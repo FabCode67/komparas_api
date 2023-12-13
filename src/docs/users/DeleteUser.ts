@@ -1,8 +1,8 @@
 export default {
-    get: {
+    delete:{
         tags: ["Users"],
-        description: "Get user by id",
-        operationId: "getUser",
+        description: "Delete user",
+        operationId: "deleteUser",
         parameters: [
             {
                 name: "id",
@@ -28,5 +28,6 @@ export default {
                 description: "User was not found",
             },
         },
+
     },
-}
+    }
