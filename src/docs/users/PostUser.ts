@@ -1,6 +1,6 @@
 export default {
     post: {
-        tags: ["User CRUD operations"],
+        tags: ["Users"],
         description: "Add new User",
         operationId: "addUser",
         requestBody: {
@@ -14,11 +14,9 @@ export default {
                             email: { type: "string", format: "email" },
                             password: { type: "string", minLength: 8 },
                             confirm_password: { type: "string" },
-                            role: { type: "string" },
-                            // Assuming 'file' is the field name for the image
-                            file: { type: "string", format: "binary" },
+                            profile_picture: { type: "string", format: "binary" },
                         },
-                        required: ["first_name", "last_name", "email", "password", "confirm_password", "role"],
+                        required: ["first_name", "last_name", "email", "password", "confirm_password"],
                     },
                 },
             },
@@ -58,4 +56,5 @@ export default {
             },
         },
     },
+    
 };

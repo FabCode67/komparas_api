@@ -8,11 +8,11 @@ import bcrypt from 'bcrypt';
 
 export const addUser = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { first_name, last_name, email, password, confirm_password, role } = req.body;
+        const { first_name, last_name, email, password, confirm_password } = req.body;
         const imageFile = req.file;
 
         // Check if at least one of the required fields is present
-        if (!first_name || !last_name || !email || !password || !confirm_password || !role) {
+        if (!first_name || !last_name || !email || !password || !confirm_password ) {
             res.status(400).json({
                 status: false,
                 message: "Please fill all required fields",
@@ -78,7 +78,7 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
                             email: email,
                             password: hashedPassword,
                             confirm_password: confirm_password,
-                            role: role,
+                            role: 'role',
                             status: "enabled",
                             profile_picture: cloudinaryResult.secure_url as string,
                         });
@@ -107,7 +107,7 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
                 email: email,
                 password: hashedPassword,
                 confirm_password: confirm_password,
-                role: role,
+                role: 'buyer',
                 status: "enabled",
             });
 

@@ -1,3 +1,5 @@
+import { Schema } from "mongoose";
+
 export default {
     components: {
       schemas: {
@@ -61,10 +63,38 @@ export default {
               description: "Status",
               example: "enabled",
             },
-            profile_picture: {
+            product_image: {
               type: "string",
               description: "Profile picture",
               example: "https://res.cloudinary.com/dq7l8216n/image/upload/v1625769678/product-image/1625769677545-IMG_20210630_144000_1_m4j1xu.jpg",
+            },
+            resetToken: {
+              type: "string",
+              description: "Reset token",
+              example: "null",
+            },
+            resetTokenExpiry: {
+              type: "number",
+              description: "Reset token expiry",
+              example: "null",
+            },
+          },
+        },
+        Category:{
+          type: "object",
+          properties:{
+            name:{
+              type:'string',
+              description: "category name",
+              example:'phones',
+            },
+            parent_id:{
+              type:Schema.Types.ObjectId,
+              decription:"enter sub category"
+            },
+            children:{
+              type:Schema.Types.ObjectId,
+              decription:"enter sub category"
             },
           },
         },
