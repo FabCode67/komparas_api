@@ -6,5 +6,6 @@ export interface IShop extends Document {
     location: string;
     contactInfo?: string;
     workingHours?: string;
+    map:any
 }
 
