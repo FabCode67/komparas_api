@@ -19,6 +19,55 @@ export default {
             },
           },
         },
+
+        Users: {
+          type: "object",
+          properties: {
+            id: {
+              $ref: "#/components/schemas/id",
+            },
+            first_name: {
+              type: "string",
+              description: "First name",
+              example: "John",
+            },
+            last_name: {
+              type: "string",
+              description: "Last name",
+              example: "Doe",
+            },
+            email: {
+              type: "string",
+              description: "Email address",
+              example: "test@gmail.com",
+            },
+            password: {
+              type: "string",
+              description: "Password",
+              example: "12345678",
+            },
+            confirm_password: {
+              type: "string",
+              description: "Confirm password",
+              example: "12345678",
+            },
+            role: {
+              type: "string",
+              description: "Role",
+              example: "buyer",
+            },
+            status: {
+              type: "string",
+              description: "Status",
+              example: "enabled",
+            },
+            profile_picture: {
+              type: "string",
+              description: "Profile picture",
+              example: "https://res.cloudinary.com/dq7l8216n/image/upload/v1625769678/product-image/1625769677545-IMG_20210630_144000_1_m4j1xu.jpg",
+            },
+          },
+        },
         Error: {
           type: "object",
           properties: {
@@ -37,4 +86,6 @@ export default {
       },
     },
   };
+
+
   

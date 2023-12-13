@@ -19,11 +19,11 @@ const productSchema = new Schema<IProducts>({
         type: String,
         required: true,
     },
-    vendor: {
+    vendors: [{
         type: Schema.Types.ObjectId,
-        ref:'Shop',
+        ref: 'Shop',
         required: true,
-    },
+    }],
     category: {
         type: Schema.Types.ObjectId,
         ref: 'Categories',
@@ -32,5 +32,6 @@ const productSchema = new Schema<IProducts>({
 }, {
     timestamps: true,
 });
+
 
 export default model<IProducts>('Products', productSchema);

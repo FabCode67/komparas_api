@@ -6,6 +6,7 @@ import productImage from "../../models/productImage";
 import { v2 as cloudinaryV2, UploadApiResponse, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
 import Shop from "../../models/shop";
+import { IShop } from "../../types/shop";
 
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -37,11 +38,10 @@ export const getProductsWithImages = async (req: Request, res: Response): Promis
         });
     }
 };
-
 export const getSingleProductWithImages = async (req: Request, res: Response): Promise<void> => {
     try {
         const productId = req.params.productId;
-        const product: IProducts | null = await Products.findById(productId);
+        const product: IProducts | null | any = await Products.findById(productId);
     
         if (!product) {
             res.status(404).json({
@@ -53,12 +53,23 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
 
         const productImages = await productImage.find({ product: product._id });
         const productCategory = await Category.findById(product.category);
+        
+        // Fetch details for each vendor in the product.vendors array
+        const vendorDetailsPromises = product?.vendors?.map(async (vendorId:any) => {
+            const vendor = await Shop.findById(vendorId);
+            return vendor;
+        });
+
+        // Wait for all vendor details to be fetched
+        const vendorDetails = await Promise.all(vendorDetailsPromises);
+
         res.status(200).json({
             status: true,
             product: {
                 ...product.toObject(),
                 product_images: productImages,
                 category: productCategory,
+                vendors: vendorDetails, // Return an array of vendor details
             },
         });
     } catch (error) {
@@ -72,9 +83,10 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
 
 
 
+
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { product_name, product_description, product_price, category_name, vendor_id } = req.body;
+        const { product_name, product_description, product_price, category_name, vendor_ids } = req.body;
         const imageFile = req.file;
     
         // Check if no image file was uploaded
@@ -100,42 +112,32 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
 
                     const category = await Category.findOne({ name: category_name });
 
-                    if (!category) {
-                      res.status(404).json({
-                        status: false,
-                        message: 'Category not found',
-                      });
-                      return;
-                    }
-                              const vendor = await Shop.findOne({ _id: vendor_id })
-                    const vendors = await Shop.find()
+if (!category) {
+    res.status(404).json({
+        status: false,
+        message: 'Category not found',
+    });
+    return;
+}
 
-                    if (!category) {
-                        res.status(404).json({
-                            status: false,
-                            message: 'Category not found',
-                        });
-                        return;
-                    }
+const vendors = await Shop.find({ _id: { $in: vendor_ids } });
 
-                    if (!vendor) {
-                        res.status(404).json({
-                            status: false,
-                            message: 'Vendor not found'
-                        });
-                        return;
-                    }
+// if (vendors.length !== vendor_ids.length) {
+//     res.status(404).json({
+//         status: false,
+//         message: 'One or more vendors not found',
+//     });
+//     return;
+// }
 
-
-                    const newProduct: IProducts = new Products({
-                        product_name: product_name,
-                        product_description: product_description,
-                        product_price: product_price,
-                        category: category._id,
-                        product_image: cloudinaryResult.secure_url,
-                        vendor: vendor,
-                      });
-            
+const newProduct: IProducts = new Products({
+    product_name: product_name,
+    product_description: product_description,
+    product_price: product_price,
+    category: category._id,
+    product_image: cloudinaryResult.secure_url,
+    vendors: vendors.map(vendor => vendor._id),
+});
 
                     const newProductResult: IProducts = await newProduct.save();
                     res.status(201).json({
@@ -155,6 +157,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
         console.error(err);
         res.status(500).json({
             status: false,
+            error: err,
             message: 'An error occurred while adding the product',
         });
     }
