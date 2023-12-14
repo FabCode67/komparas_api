@@ -21,7 +21,7 @@ import {
 router.get("/users", getUsers)
 router.post("/users/add", upload.single('profile_picture'), addUser);
 router.put("/users/update/:id", updateUser)
-router.delete("/users/delete/:id", authenticat, deleteUser)
+router.delete("/users/delete/:id", isAdminAuthenticat, deleteUser)
 router.get("/users/:id", getUserById)
 router.get("/users/email/:email", getUserByEmail)
 router.post("/users/contact", sendMessage)

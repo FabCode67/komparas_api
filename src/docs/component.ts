@@ -2,6 +2,16 @@ import { Schema } from "mongoose";
 
 export default {
     components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: "apiKey",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          name: "Authorization",
+          in: "header",
+        },
+      },
+  
       schemas: {
         id: {
           type: "string",
@@ -118,4 +128,3 @@ export default {
   };
 
 
-  
