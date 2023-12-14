@@ -23,7 +23,7 @@ router.get("/products", getProducts)
 router.get("/products/images", getProductsWithImages)
 router.get("/products/images/:productId", getSingleProductWithImages)
 router.get("/products/:productId", getProductById)
-router.post("/products",upload.single('product_image'), addProduct)
+router.post("/products/add",upload.single('product_image'), isAdminAuthenticat, addProduct)
 router.delete("/products/:productId", deleteProduct)
 router.put("/products/:productId", isAdminAuthenticat, updateProduct)
 router.get('/products/:category_id', getProductsByCategory);

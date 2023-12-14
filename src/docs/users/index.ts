@@ -8,6 +8,13 @@ import AddCategory from "../categories/AddCategory";
 import GetCategoryByNameOrID from "../categories/GetCategoryByNameOrID";
 import DeleteCategory from "../categories/DeleteCategory";
 import GetParentCategories from "../categories/GetParentCategories";
+import AddShop from "../shop/AddShop";
+import GetAllShops from "../shop/GetAllShops";
+import GetSingleShop from "../shop/GetSingleShop";
+import UpdateShop from "../shop/UpdateShop";
+import DeleteShop from "../shop/DeleteShop";
+import AddProduct from "../products/AddProduct";
+import GetAllProducts from "../products/GetAllProducts";
 export default {
 
     paths: {
@@ -40,6 +47,23 @@ export default {
         },
         '/categories/{category_id}': {
             ...DeleteCategory,
+        },
+        '/shops/add': {
+            ...AddShop,
+        },
+        '/shops': {
+            ...GetAllShops,
+        },
+        '/shops/{id}': {
+            ...GetSingleShop,
+            ...UpdateShop,
+            ...DeleteShop,
+        },
+        '/products/add': {
+            ...AddProduct,
+        },
+        '/products': {
+            ...GetAllProducts,
         },
     },
 };
