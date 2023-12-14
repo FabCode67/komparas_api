@@ -21,6 +21,31 @@ export const getParentCategories = async (req: Request, res: Response): Promise<
     }
 };
 
+export const getCategoryByNameOrID = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { category } = req.params;
+
+        const categoryToFind = await Category.findById(category).populate('children');
+
+        if (!categoryToFind) {
+            const categoryByName = await Category.findOne({ name: category }).populate('children');
+
+            if (!categoryByName) {
+                res.status(404).json({ message: 'Category not found' });
+                return;
+            }
+
+            res.status(200).json(categoryByName);
+            return;
+        }
+
+        res.status(200).json(categoryToFind);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 export const addCategory = async (req: Request, res: Response): Promise<void> => {
     try {
         const { name, parent_id } = req.body;

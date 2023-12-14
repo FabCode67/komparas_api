@@ -10,4 +10,15 @@ export default {
         url: "web.com", 
       },
     },
+    components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: "apiKey",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          name: "Authorization",
+          in: "header",
+        },
+      },
+    },
   };

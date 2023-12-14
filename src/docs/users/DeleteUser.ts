@@ -3,6 +3,11 @@ export default {
         tags: ["Users"],
         description: "Delete user",
         operationId: "deleteUser",
+        security: [
+            {
+              BearerAuth: [],
+            },
+          ],
         parameters: [
             {
                 name: "id",
