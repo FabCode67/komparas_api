@@ -1,6 +1,6 @@
 export default {
     post: {
-        tags:["Product"],
+        tags:["Products"],
         description:"Add product",
         operationId:"addProduct",
         security:[

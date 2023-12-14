@@ -1,4 +1,3 @@
-import users from "./users";
 export default {
     tags: [
       {
