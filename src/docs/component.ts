@@ -108,6 +108,74 @@ export default {
             },
           },
         },
+        Shop:{
+          type: "object",
+          properties:{
+            name:{
+              type:'string',
+              description: "shop name",
+              example:'ikaze shop',
+            },
+            location:{
+              type:'string',
+              description: "shop location",
+              example:'kigali',
+            },
+            phone:{
+              type:'string',
+              description: "shop phone",
+              example:'0788888888',
+            },
+            email:{
+              type:'string',
+              description: "shop email",
+              example:'ikaze@gmail.com',
+            },
+            description:{
+              type:'string',
+              description: "shop description",
+              example:'we sell all kinds of clothes',
+            },
+            working_hours:{
+              type:'string',
+              description: "shop working hours",
+              example:'8:00-18:00',
+            },
+          },
+        },
+        Products:{
+          type: "object",
+          properties:{
+            product_name:{
+              type:'string',
+              description: "product name",
+              example:'iphone 12',
+            },
+            product_description:{
+              type:'string',
+              description: "product description",
+              example:'iphone 12 pro max',
+            },
+            product_price:{
+              type:'number',
+              description: "product price",
+              example:'1000',
+            },
+            product_image:{
+              type:'string',
+              description: "product image",
+              example:'https://res.cloudinary.com/dq7l8216n/image/upload/v1625769678/product-image/1625769677545-IMG_20210630_144000_1_m4j1xu.jpg',
+            },
+            vendors:{
+              type:Schema.Types.ObjectId,
+              decription:"enter vendor id"
+            },
+            category:{
+              type:Schema.Types.ObjectId,
+              decription:"enter category id"
+            },
+          },
+        },
         Error: {
           type: "object",
           properties: {

@@ -30,6 +30,20 @@ export const getShopById = async (req: Request, res: Response): Promise<void> =>
 export const addShop = async (req: Request, res: Response): Promise<void> => {
     try {
         const shop: IShop = new Shop(req.body);
+
+        // check if shop with the same name already exists
+        const existingShop = await Shop.findOne({ name: shop.name });
+        if (existingShop) {
+            res.status(400).json({ message: 'Shop with the same name already exists' });
+            return;
+        }
+
+        // check if shop with the same email already exists
+        const existingEmail = await Shop.findOne({ email: shop.email });
+        if (existingEmail) {
+            res.status(400).json({ message: 'Shop with the same email already exists' });
+            return;
+        }
         const newShop: IShop = await shop.save();
         res.status(201).json(newShop);
     } catch (error) {
@@ -44,8 +58,10 @@ export const updateShop = async (req: Request, res: Response): Promise<void> => 
         if (shop) {
             shop.name = req.body.name;
             shop.location = req.body.location;
-            shop.contactInfo = req.body.contactInfo;
-            shop.workingHours = req.body.workingHours;
+            shop.working_hours = req.body.working_hours;
+            shop.phone = req.body.phone;
+            shop.email = req.body.email;
+            shop.description = req.body.description;
             const updatedShop: IShop = await shop.save();
             res.status(200).json(updatedShop);
         } else {
