@@ -16,6 +16,8 @@ import DeleteShop from "../shop/DeleteShop";
 import AddProduct from "../products/AddProduct";
 import GetAllProducts from "../products/GetAllProducts";
 import updateProduct from "../products/updateProduct";
+import DeleteProduct from "../products/DeleteProduct";
+import GetProductByImage from "../products/GetProductByImage";
 export default {
 
     paths: {
@@ -68,6 +70,10 @@ export default {
         },
         '/products/{productId}': {
             ...updateProduct,
+            ...DeleteProduct,
+        },
+        '/products/images/{productId}': {
+            ...GetProductByImage,
         },
     },
 };
