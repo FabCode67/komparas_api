@@ -10,6 +10,7 @@ export interface IProducts extends Document {
     product_description: string;
     product_price: number;
     category: Types.ObjectId | ICategory;
-    vendors:Types.ObjectId | IShop;
     product_image: string;
+    vendors: Types.ObjectId[] | IShop[];
+
 }

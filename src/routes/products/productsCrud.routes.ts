@@ -4,11 +4,11 @@ import {
     getProducts, 
     addProduct,
     deleteProduct,
-    updateProduct,
     getProductById,
     getProductsWithImages,
     getProductsByCategory,
-    getSingleProductWithImages
+    getSingleProductWithImages,
+    updateProduct
 } from "../../controllers/products/productCrud";
 import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
 import multer from "multer";
@@ -24,10 +24,9 @@ router.get("/products/images", getProductsWithImages)
 router.get("/products/images/:productId", getSingleProductWithImages)
 router.get("/products/:productId", getProductById)
 router.post("/products/add",upload.single('product_image'), isAdminAuthenticat, addProduct)
+router.put("/products/:productId",upload.single('product_image'), updateProduct)
 router.delete("/products/:productId", deleteProduct)
-router.put("/products/:productId", isAdminAuthenticat, updateProduct)
 router.get('/products/:category_id', getProductsByCategory);
 router.get('/products/category/:category_name', getProductsByCategory);
-
 
 export default router

@@ -15,6 +15,7 @@ import UpdateShop from "../shop/UpdateShop";
 import DeleteShop from "../shop/DeleteShop";
 import AddProduct from "../products/AddProduct";
 import GetAllProducts from "../products/GetAllProducts";
+import updateProduct from "../products/updateProduct";
 export default {
 
     paths: {
@@ -64,6 +65,9 @@ export default {
         },
         '/products': {
             ...GetAllProducts,
+        },
+        '/products/{productId}': {
+            ...updateProduct,
         },
     },
 };

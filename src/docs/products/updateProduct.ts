@@ -1,14 +1,24 @@
 export default {
-    post: {
+    put: {
         tags:["Products"],
-        description:"Add product",
-        operationId:"addProduct",
-        security:[
+        description:"Update product",
+        operationId:"updateProduct",
+        // security:[
+        //     {
+        //         BearerAuth:[]
+        //     }
+        // ],
+        
+        parameters:[
             {
-                BearerAuth:[]
+                name:"productId",
+                in:"path",
+                schema:{
+                    type:"string"
+                },
+                required:true
             }
         ],
-        parameters:[],
         requestBody:{
             content :{
                 "multipart/form-data":{
@@ -22,14 +32,14 @@ export default {
                             product_image:{type:"string", format:"binary"},
                             vendor_ids:{type:"string", example:"Vendor id"},
                         },
-                        required:["product_name", "product_description", "product_price", "category_name", "product_image", "vendor_ids"]
+                        required:["category_name", "product_image"]
                     },
                 },
             },
         },
         responses:{
-            "201":{
-                description:"Product was added",
+            "200":{
+                description:"Product was updated",
                 content:{
                     "application/json":{
                         schema:{
@@ -60,15 +70,26 @@ export default {
                     }
                 }
             },
-            
-            "500":{
-                description:"Internal Server Error",
+            "404":{
+                description:"Not found",
                 content:{
                     "application/json":{
                         example:{
                             status:false,
-                            message:"An error occurred while adding the product"
+                            message:"Product not found"
                         }
+                    }
+                }
+            }
+        },
+
+        "500":{
+            description:"Internal Server Error",
+            content:{
+                "application/json":{
+                    example:{
+                        status:false,
+                        message:"An error occurred while updating the product"
                     }
                 }
             }

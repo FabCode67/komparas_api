@@ -7,6 +7,8 @@ import { v2 as cloudinaryV2, UploadApiResponse, UploadStream } from "cloudinary"
 import streamifier from "streamifier";
 import Shop from "../../models/shop";
 import { IShop } from "../../types/shop";
+import { Types } from 'mongoose';
+
 
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -193,37 +195,93 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     }
 };
 
-
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
     try {
-        const productId = req.params.productId;
-        const updateData = req.body;
-        const updatedProduct = await Products.findByIdAndUpdate(productId, updateData, {
-            new: true,
+      const productId = req.params.productId;
+      const { product_name, product_description, product_price, category_name, vendor_ids } = req.body;
+      const imageFile = req.file;
+  
+      // Check if no image file was uploaded
+      if (!imageFile) {
+        res.status(400).json({
+          status: false,
+          message: 'Please upload an image file',
         });
-
-        if (!updatedProduct) {
-            res.status(404).json({
-                status: false,
-                message: "Product not found",
+        return;
+      }
+  
+      const result: UploadStream = cloudinaryV2.uploader.upload_stream(
+        { folder: 'product-images' },
+        async (error, cloudinaryResult: any) => {
+          if (error) {
+            console.error(error);
+            res.status(500).json({
+              status: false,
+              message: 'An error occurred while uploading the image to Cloudinary',
             });
-            return;
+          } else {
+            const category = await Category.findOne({ name: category_name });
+  
+            if (!category) {
+              res.status(404).json({
+                status: false,
+                message: 'Category not found',
+              });
+              return;
+            }
+  
+            let existingVendors: Types.ObjectId[] | IShop[] = [];
+            const existingProduct = await Products.findById(productId);
+            if (existingProduct) {
+              existingVendors = existingProduct.vendors;
+            }
+  
+            let newVendors: IShop[] = [];
+            if (vendor_ids) {
+              // Fetch details of the new vendors and filter out existing vendors
+              newVendors = await Shop.find({ _id: { $in: vendor_ids, $nin: existingVendors } });
+            }
+  
+            // Combine existing vendors and new vendors
+            const mergedVendors: any[] | IShop[] = [...existingVendors, ...newVendors];
+  
+            const updatedProduct: any = {
+              product_name: product_name,
+              product_description: product_description,
+              product_price: product_price,
+              category: category._id,
+              product_image: cloudinaryResult.secure_url,
+              vendors: mergedVendors.map((vendor) => (vendor instanceof Types.ObjectId ? vendor : vendor._id)),
+            };
+  
+            const updatedProductResult = await Products.findByIdAndUpdate(productId, updatedProduct, {
+              new: true,
+            });
+  
+            res.status(200).json({
+              message: 'Product updated successfully',
+              product: updatedProductResult,
+            });
+          }
         }
-
-        res.status(200).json({
-            status: true,
-            message: "Product updated successfully",
-            product: updatedProduct,
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            status: false,
-            message: "An error occurred while updating the product",
-        });
+      );
+  
+      if (!result) {
+        throw new Error('Cloudinary upload failed');
+      }
+  
+      streamifier.createReadStream(imageFile.buffer).pipe(result);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        status: false,
+        error: err,
+        message: 'An error occurred while updating the product',
+      });
     }
-};
-
+  };
+  
+  
 
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
     try {
