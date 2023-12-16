@@ -3,12 +3,11 @@ export default {
         tags:["Products"],
         description:"Update product",
         operationId:"updateProduct",
-        // security:[
-        //     {
-        //         BearerAuth:[]
-        //     }
-        // ],
-        
+        security:[
+            {
+                BearerAuth:[]
+            }
+        ],
         parameters:[
             {
                 name:"productId",
