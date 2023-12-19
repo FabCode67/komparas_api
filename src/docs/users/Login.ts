@@ -10,8 +10,8 @@ export default {
                     schema:{
                         type:"object",
                         properties:{
-                            email:{type:"string",format:"email", example:"jajan@gmail.com", description:"Enter your email"},
-                            password:{type:"string", example:"12345678" ,minLength:8}
+                            email:{type:"string",format:"email", example:"admin@gmail.com", description:"Enter your email"},
+                            password:{type:"string", example:"P@ssword" ,minLength:8}
                         },
                         required:["email","password"]
                     }

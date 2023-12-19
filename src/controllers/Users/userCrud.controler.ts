@@ -78,7 +78,7 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
                             email: email,
                             password: hashedPassword,
                             confirm_password: confirm_password,
-                            role: 'role',
+                            role: 'buyer',
                             status: "enabled",
                             profile_picture: cloudinaryResult.secure_url as string,
                         });
