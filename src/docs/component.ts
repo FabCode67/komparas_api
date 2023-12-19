@@ -100,11 +100,11 @@ export default {
             },
             parent_id:{
               type:Schema.Types.ObjectId,
-              decription:"enter sub category"
+              description:"enter sub category"
             },
             children:{
               type:Schema.Types.ObjectId,
-              decription:"enter sub category"
+              description:"enter sub category"
             },
           },
         },
@@ -168,13 +168,27 @@ export default {
             },
             vendors:{
               type:Schema.Types.ObjectId,
-              decription:"enter vendor id"
+              description:"enter vendor id"
             },
             category:{
               type:Schema.Types.ObjectId,
-              decription:"enter category id"
+              description:"enter category id"
             },
           },
+        },
+        ProductImages:{
+          type:"object",
+          properties:{
+            product:{
+              type:Schema.Types.ObjectId,
+              description:"Product image"
+            },
+            product_image:{
+              type:"string",
+              description:"Image"
+            }
+
+          }
         },
         Error: {
           type: "object",
