@@ -29,6 +29,16 @@ const productSchema = new Schema<IProducts>({
         ref: 'Categories',
         required: true,
     },
+    product_specifications: [{
+        key: {
+            type: String,
+            required: true,
+        },
+        value: {
+            type: String,
+            required: true,
+        },
+    }],
 }, {
     timestamps: true,
 });

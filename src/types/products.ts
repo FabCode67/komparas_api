@@ -12,5 +12,5 @@ export interface IProducts extends Document {
     category: Types.ObjectId | ICategory;
     product_image: string;
     vendors: Types.ObjectId[] | IShop[];
-
+    product_specifications?: Array<{ key: string; value: string }>;
 }

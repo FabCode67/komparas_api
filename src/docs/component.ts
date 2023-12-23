@@ -174,6 +174,11 @@ export default {
               type:Schema.Types.ObjectId,
               description:"enter category id"
             },
+            product_specifications:{
+              type:'array',
+              description: "product specifications",
+              example:[{key:'color',value:'black'},{key:'size',value:'12px'}],
+            }
           },
         },
         ProductImages:{

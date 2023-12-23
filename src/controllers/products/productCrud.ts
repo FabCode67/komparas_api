@@ -88,9 +88,10 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
 
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { product_name, product_description, product_price, category_name, vendor_ids } = req.body;
-        const imageFile = req.file;
-    
+      const { product_name, product_description, product_price, category_name, vendor_ids, specifications } = req.body;
+      const imageFile = req.file;
+      console.log("==============================================================",req.body);
+
         // Check if no image file was uploaded
         if (!imageFile) {
           res.status(400).json({
@@ -123,6 +124,10 @@ if (!category) {
 }
 
 const vendors = await Shop.find({ _id: { $in: vendor_ids } });
+const productSpecifications: Array<{ key: string; value: string }> = specifications.map((spec: any) => ({
+  key: spec.key.toString(), // Ensure key is a string
+  value: spec.value.toString(), // Ensure value is a string
+}));
 
 // if (vendors.length !== vendor_ids.length) {
 //     res.status(404).json({
@@ -139,6 +144,8 @@ const newProduct: IProducts = new Products({
     category: category._id,
     product_image: cloudinaryResult.secure_url,
     vendors: vendors.map(vendor => vendor._id),
+    product_specifications: productSpecifications, // Use the explicitly casted specifications
+
 });
 
                     const newProductResult: IProducts = await newProduct.save();
