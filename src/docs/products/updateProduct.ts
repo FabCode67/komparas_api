@@ -10,12 +10,12 @@ export default {
         ],
         parameters:[
             {
-                name:"productId",
-                in:"path",
-                schema:{
-                    type:"string"
-                },
-                required:true
+            name:"productId",
+            in:"path",
+            schema:{
+                type:"string"
+            },
+            required:true
             }
         ],
         requestBody:{
@@ -30,8 +30,19 @@ export default {
                             category_name:{type:"string", example:"Category name"},
                             product_image:{type:"string", format:"binary"},
                             vendor_ids:{type:"string", example:"Vendor id"},
+                            specifications: {
+                                type: "array",
+                                items: {
+                                    type: "object",
+                                    properties: {
+                                        key: { type: "string", example: "Resolution" },
+                                        value: { type: "string", example: "12pxl" },
+                                    },
+                                    required: ["key", "value"],
+                                },
+                            },
                         },
-                        required:["category_name", "product_image"]
+                        required:["product_name", "product_description", "product_price", "category_name", "product_image", "vendor_ids"]
                     },
                 },
             },
@@ -64,31 +75,8 @@ export default {
                     "application/json":{
                         example:{
                             status:false,
-                            message:"Access denied due to invalid token"
+                            message:"Unauthorized"
                         }
-                    }
-                }
-            },
-            "404":{
-                description:"Not found",
-                content:{
-                    "application/json":{
-                        example:{
-                            status:false,
-                            message:"Product not found"
-                        }
-                    }
-                }
-            }
-        },
-
-        "500":{
-            description:"Internal Server Error",
-            content:{
-                "application/json":{
-                    example:{
-                        status:false,
-                        message:"An error occurred while updating the product"
                     }
                 }
             }
