@@ -124,18 +124,11 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
           }
 
           const vendors = await Shop.find({ _id: { $in: vendor_ids } });
-          const productSpecifications: Array<{ key: string; value: string }> = specifications.map((spec: any) => ({
-            key: spec.key.toString(), // Ensure key is a string
-            value: spec.value.toString(), // Ensure value is a string
+          const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
+            key: spec?.key?.toString(), 
+            value: spec?.value?.toString(), 
           }));
-
-          // if (vendors.length !== vendor_ids.length) {
-          //     res.status(404).json({
-          //         status: false,
-          //         message: 'One or more vendors not found',
-          //     });
-          //     return;
-          // }
+          
 
           const newProduct: IProducts = new Products({
             product_name: product_name,
