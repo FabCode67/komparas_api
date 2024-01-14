@@ -84,15 +84,11 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
 };
 
 
-
-
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { product_name, product_description, product_price, category_name, vendor_ids, specifications } = req.body;
+    const { product_name, product_description, category_name, vendor_prices, specifications } = req.body;
     const imageFile = req.file;
-    console.log("==============================================================", req.body);
 
-    // Check if no image file was uploaded
     if (!imageFile) {
       res.status(400).json({
         status: false,
@@ -100,7 +96,6 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
       });
       return;
     }
-
 
     const result: UploadStream = cloudinaryV2.uploader.upload_stream(
       { folder: 'product-images' },
@@ -112,7 +107,6 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             message: 'An error occurred while uploading the image to Cloudinary',
           });
         } else {
-
           const category = await Category.findOne({ name: category_name });
 
           if (!category) {
@@ -123,22 +117,20 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             return;
           }
 
-          const vendors = await Shop.find({ _id: { $in: vendor_ids } });
+          const vendors = await Shop.find({ _id: { $in: vendor_prices.map((vp: any) => vp.vendor_id) } });
           const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
-            key: spec?.key?.toString(), 
-            value: spec?.value?.toString(), 
+            key: spec?.key?.toString(),
+            value: spec?.value?.toString(),
           }));
-          
 
           const newProduct: IProducts = new Products({
             product_name: product_name,
             product_description: product_description,
-            product_price: product_price,
             category: category._id,
             product_image: cloudinaryResult.secure_url,
-            vendors: vendors.map(vendor => vendor._id),
-            product_specifications: productSpecifications, // Use the explicitly casted specifications
-
+            vendors: vendors?.map(vendor => vendor._id),
+            product_specifications: productSpecifications,
+            vendor_prices: vendor_prices,
           });
 
           const newProductResult: IProducts = await newProduct.save();
@@ -147,8 +139,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             product: newProductResult,
           });
         }
-      })
-
+      });
 
     if (!result) {
       throw new Error("Cloudinary upload failed");
@@ -163,9 +154,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
       message: 'An error occurred while adding the product',
     });
   }
-
 };
-
 
 
 export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
@@ -194,92 +183,92 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     });
   }
 };
-
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-      const productId = req.params.productId;
-      const { product_name, product_description, product_price, category_name, vendor_ids, specifications } = req.body;
-      const imageFile = req.file;
+    const productId = req.params.productId;
+    const { product_name, product_description, category_name, vendor_prices, specifications } = req.body;
+    const imageFile = req.file;
 
-      // Check if no image file was uploaded
-      if (!imageFile) {
-          res.status(400).json({
-              status: false,
-              message: 'Please upload an image file',
-          });
-          return;
-      }
-
-      const result: UploadStream = cloudinaryV2.uploader.upload_stream(
-          { folder: 'product-images' },
-          async (error, cloudinaryResult: any) => {
-              if (error) {
-                  console.error(error);
-                  res.status(500).json({
-                      status: false,
-                      message: 'An error occurred while uploading the image to Cloudinary',
-                  });
-              } else {
-                  const category = await Category.findOne({ name: category_name });
-
-                  if (!category) {
-                      res.status(404).json({
-                          status: false,
-                          message: 'Category not found',
-                      });
-                      return;
-                  }
-
-                  let existingVendors: Types.ObjectId[] | IShop[] = [];
-                  const existingProduct = await Products.findById(productId);
-                  if (existingProduct) {
-                      existingVendors = existingProduct.vendors;
-                  }
-
-                  let newVendors: IShop[] = [];
-                  if (vendor_ids) {
-                      // Fetch details of the new vendors and filter out existing vendors
-                      newVendors = await Shop.find({ _id: { $in: vendor_ids, $nin: existingVendors } });
-                  }
-
-                  // Combine existing vendors and new vendors
-                  const mergedVendors: any[] | IShop[] = [...existingVendors, ...newVendors];
-
-                  // Create the updatedProduct object
-                  const updatedProduct: any = {
-                      product_name: product_name,
-                      product_description: product_description,
-                      product_price: product_price,
-                      category: category._id,
-                      product_image: cloudinaryResult.secure_url,
-                      vendors: mergedVendors.map((vendor) => (vendor instanceof Types.ObjectId ? vendor : vendor._id)),
-                      product_specifications: specifications, // Include specifications in the update
-                  };
-
-                  const updatedProductResult = await Products.findByIdAndUpdate(productId, updatedProduct, {
-                      new: true,
-                  });
-
-                  res.status(200).json({
-                      message: 'Product updated successfully',
-                      product: updatedProductResult,
-                  });
-              }
-          }
-      );
-
-      if (!result) {
-          throw new Error('Cloudinary upload failed');
-      }
-
-      streamifier.createReadStream(imageFile.buffer).pipe(result);
-  } catch (err) {
-      console.error(err);
-      res.status(500).json({
-          status: false,
-          error: err,
-          message: 'An error occurred while updating the product',
+    // Check if no image file was uploaded
+    if (!imageFile) {
+      res.status(400).json({
+        status: false,
+        message: 'Please upload an image file',
       });
+      return;
+    }
+
+    const result: UploadStream = cloudinaryV2.uploader.upload_stream(
+      { folder: 'product-images' },
+      async (error, cloudinaryResult: any) => {
+        if (error) {
+          console.error(error);
+          res.status(500).json({
+            status: false,
+            message: 'An error occurred while uploading the image to Cloudinary',
+          });
+        } else {
+          const category = await Category.findOne({ name: category_name });
+
+          if (!category) {
+            res.status(404).json({
+              status: false,
+              message: 'Category not found',
+            });
+            return;
+          }
+
+          let existingVendors: Types.ObjectId[] | IShop[] = [];
+          const existingProduct = await Products.findById(productId);
+          if (existingProduct) {
+            existingVendors = existingProduct.vendors;
+          }
+
+          let newVendors: IShop[] = [];
+          if (vendor_prices) {
+            // Fetch details of the new vendors and filter out existing vendors
+            const vendorIds = vendor_prices.map((vp: any) => vp.vendor_id);
+            newVendors = await Shop.find({ _id: { $in: vendorIds, $nin: existingVendors } });
+          }
+
+          // Combine existing vendors and new vendors
+          const mergedVendors: any[] | IShop[] = [...existingVendors, ...newVendors];
+
+          // Create the updatedProduct object
+          const updatedProduct: any = {
+            product_name: product_name,
+            product_description: product_description,
+            category: category._id,
+            product_image: cloudinaryResult.secure_url,
+            vendors: mergedVendors.map((vendor) => (vendor instanceof Types.ObjectId ? vendor : vendor._id)),
+            product_specifications: specifications, // Include specifications in the update
+            vendor_prices: vendor_prices,
+          };
+
+          const updatedProductResult = await Products.findByIdAndUpdate(productId, updatedProduct, {
+            new: true,
+          });
+
+          res.status(200).json({
+            message: 'Product updated successfully',
+            product: updatedProductResult,
+          });
+        }
+      }
+    );
+
+    if (!result) {
+      throw new Error('Cloudinary upload failed');
+    }
+
+    streamifier.createReadStream(imageFile.buffer).pipe(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: false,
+      error: err,
+      message: 'An error occurred while updating the product',
+    });
   }
 };
 

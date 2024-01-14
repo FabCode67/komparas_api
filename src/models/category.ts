@@ -8,5 +8,4 @@ const CategorySchema = new Schema<ICategory>({
 }, { timestamps: true });
 
 const Category = model<ICategory>('Category', CategorySchema);
-
 export default Category;
