@@ -15,6 +15,9 @@ interface IProducts extends Document {
   vendor_prices: Array<{ vendor_id: Types.ObjectId | IShop; price: number }>;
   createdAt?: Date;
   updatedAt?: Date;
+  product_price:String;
+  product_quantity:String;
+  product_category:String;
 }
 
 export { IProducts };

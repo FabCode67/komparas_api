@@ -86,7 +86,7 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
 
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { product_name, product_description, category_name, vendor_prices, specifications } = req.body;
+    const { product_name, product_price, product_quantity, product_category, product_description, category_name, vendor_prices, specifications } = req.body;
     const imageFile = req.file;
 
     if (!imageFile) {
@@ -131,6 +131,10 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             vendors: vendors?.map(vendor => vendor._id),
             product_specifications: productSpecifications,
             vendor_prices: vendor_prices,
+            product_price: product_price,
+            product_quantity: product_quantity,
+            product_category: product_category,
+
           });
 
           const newProductResult: IProducts = await newProduct.save();
