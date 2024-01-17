@@ -34,3 +34,14 @@ export const getMessages = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Oops! essayer à nouveau!' });
     }
 };
+
+export const deleteMessage = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        await Contact.findByIdAndDelete(id);
+        res.status(200).json({ message: 'Message supprimé avec succès.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Oops! essayer à nouveau!' });
+    }
+}

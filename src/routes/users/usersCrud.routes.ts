@@ -8,7 +8,7 @@ import {
     updateUser, 
     deleteUser
  } from "../../controllers/Users/userCrud.controler";
- import { sendMessage, getMessages } from "../../controllers/Users/contact";
+ import { sendMessage, getMessages, deleteMessage } from "../../controllers/Users/contact";
  import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
  import multer from "multer";
 
@@ -26,6 +26,7 @@ router.get("/users/:id", getUserById)
 router.get("/users/email/:email", getUserByEmail)
 router.post("/users/contact", sendMessage)
 router.get("/messages", getMessages)
+router.delete("/messages/:id", deleteMessage)
 
 export default router
 
