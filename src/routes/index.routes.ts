@@ -8,6 +8,7 @@ import productImageRoutes from "./products/productImage.routes"
 // import newCatrouters from "../controllers/categories/p_category"
 import shopRoutes from "./shop/shop.routes"
 import customerRoutes from "./customer/customer.routes"
+import nativeProductsRoutes from "./products/nativeProducts.routes"
 
 export default {
     userRoutes,
@@ -19,5 +20,6 @@ export default {
     productImageRoutes,
     shopRoutes,
     customerRoutes,
+    nativeProductsRoutes,
     // newCatrouters
 };
