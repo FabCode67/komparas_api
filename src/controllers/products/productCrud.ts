@@ -117,7 +117,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             return;
           }
 
-          const vendors = await Shop.find({ _id: { $in: vendor_prices.map((vp: any) => vp.vendor_id) } });
+          const vendors = await Shop?.find({ _id: { $in: vendor_prices?.map((vp: any) => vp.vendor_id) } });
           const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
             key: spec?.key?.toString(),
             value: spec?.value?.toString(),
