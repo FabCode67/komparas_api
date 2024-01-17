@@ -86,7 +86,7 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
 
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { product_name, product_price, product_quantity, product_category, product_description, vendor_prices, specifications } = req.body;
+    const { product_name, product_description, category_name, vendor_prices, specifications } = req.body;
     const imageFile = req.file;
 
     if (!imageFile) {
@@ -107,9 +107,17 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             message: 'An error occurred while uploading the image to Cloudinary',
           });
         } else {
-          
+          const category = await Category.findOne({ name: category_name });
 
-          const vendors = await Shop?.find({ _id: { $in: vendor_prices?.map((vp: any) => vp.vendor_id) } });
+          if (!category) {
+            res.status(404).json({
+              status: false,
+              message: 'Category not found',
+            });
+            return;
+          }
+
+          const vendors = await Shop.find({ _id: { $in: vendor_prices.map((vp: any) => vp.vendor_id) } });
           const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
             key: spec?.key?.toString(),
             value: spec?.value?.toString(),
@@ -118,13 +126,11 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
           const newProduct: IProducts = new Products({
             product_name: product_name,
             product_description: product_description,
+            category: category._id,
             product_image: cloudinaryResult.secure_url,
             vendors: vendors?.map(vendor => vendor._id),
             product_specifications: productSpecifications,
             vendor_prices: vendor_prices,
-            product_price: product_price,
-            product_quantity: product_quantity,
-            product_category: product_category,
           });
 
           const newProductResult: IProducts = await newProduct.save();
