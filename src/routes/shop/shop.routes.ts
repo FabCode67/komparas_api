@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/shops', getAllShops);
 router.get('/shops/:id', getShopById);
 router.post('/shops/add', addShop);
-router.put('/shops/:id', isAdminAuthenticat, updateShop);
+router.put('/shops/:id', updateShop);
 router.delete('/shops/:id', deleteShop);
 
 export default router;
