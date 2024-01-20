@@ -124,3 +124,54 @@ export const deleteCategory = async (req: Request, res: Response): Promise<void>
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+export const updateCategory = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { category_id } = req.params;
+        const { name, parent_id } = req.body;
+        if (!category_id) {
+            res.status(400).json({ message: 'Invalid category ID' });
+            return;
+        }
+        const categoryToUpdate = await Category.findById(category_id);
+        if (!categoryToUpdate) {
+            res.status(404).json({ message: 'Category not found' });
+            return;
+        }
+
+        if (name && name !== categoryToUpdate.name) {
+            const existingCategory = await Category.findOne({ name });
+            if (existingCategory) {
+                res.status(400).json({ message: 'Category with the same name already exists' });
+                return;
+            }
+        }
+        if (parent_id) {
+            const parentCategory = await Category.findById(parent_id);
+            if (!parentCategory) {
+                res.status(400).json({ message: 'Parent category does not exist' });
+                return;
+            }
+            if (categoryToUpdate?.parent_id !== parent_id) {
+                const oldParentCategory = await Category?.findById(categoryToUpdate?.parent_id);
+                if (oldParentCategory) {
+                    oldParentCategory.children = oldParentCategory?.children?.filter(childId => childId?.toString() !== category_id);
+                    await oldParentCategory?.save();
+                }
+                parentCategory.children = parentCategory.children ?? [];
+                parentCategory?.children.push(categoryToUpdate._id);
+                await parentCategory.save();
+
+                categoryToUpdate.parent_id = parent_id;
+            }
+        }
+        if (name) {
+            categoryToUpdate.name = name;
+        }
+        await categoryToUpdate.save();
+        res.status(200).json({ message: 'Category updated successfully', category: categoryToUpdate });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
