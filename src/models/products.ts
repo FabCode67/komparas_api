@@ -10,6 +10,10 @@ const productSchema = new Schema<IProducts>({
       type: String,
       required: true,
     },
+    our_review: {
+      type: String,
+      required: true,
+    },
     product_image: {
       type: String,
       required: true,

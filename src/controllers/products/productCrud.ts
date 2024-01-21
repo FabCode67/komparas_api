@@ -3,7 +3,7 @@ import { IProducts } from '../../types/products'
 import Products from "../../models/products"
 import Category from "../../models/category";
 import productImage from "../../models/productImage";
-import { v2 as cloudinaryV2, UploadApiResponse, UploadStream } from "cloudinary";
+import { v2 as cloudinaryV2, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
 import Shop from "../../models/shop";
 import { IShop } from "../../types/shop";
@@ -56,13 +56,11 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
     const productImages = await productImage.find({ product: product._id });
     const productCategory = await Category.findById(product.category);
 
-    // Fetch details for each vendor in the product.vendors array
     const vendorDetailsPromises = product?.vendors?.map(async (vendorId: any) => {
       const vendor = await Shop.findById(vendorId);
       return vendor;
     });
 
-    // Wait for all vendor details to be fetched
     const vendorDetails = await Promise.all(vendorDetailsPromises);
 
     res.status(200).json({
