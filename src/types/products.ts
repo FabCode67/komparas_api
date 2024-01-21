@@ -18,6 +18,7 @@ interface IProducts extends Document {
   product_price:String;
   product_quantity:String;
   product_category:String;
+  our_review:String;
 }
 
 export { IProducts };

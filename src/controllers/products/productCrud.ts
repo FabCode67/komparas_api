@@ -86,7 +86,7 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
 
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { product_name, product_description, category_name, vendor_prices, specifications } = req.body;
+    const { product_name, product_description, category_name, vendor_prices, specifications, our_review } = req.body;
     const imageFile = req.file;
 
     if (!imageFile) {
@@ -131,6 +131,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             vendors: vendors?.map(vendor => vendor._id),
             product_specifications: productSpecifications,
             vendor_prices: vendor_prices,
+            our_review: our_review,
           });
 
           const newProductResult: IProducts = await newProduct.save();
@@ -186,10 +187,8 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const productId = req.params.productId;
-    const { product_name, product_description, category_name, vendor_prices, specifications } = req.body;
+    const { product_name, product_description, category_name, vendor_prices, specifications, our_review } = req.body;
     const imageFile = req.file;
-
-    // Check if no image file was uploaded
     if (!imageFile) {
       res.status(400).json({
         status: false,
@@ -197,7 +196,6 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       });
       return;
     }
-
     const result: UploadStream = cloudinaryV2.uploader.upload_stream(
       { folder: 'product-images' },
       async (error, cloudinaryResult: any) => {
@@ -226,23 +224,21 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
 
           let newVendors: IShop[] = [];
           if (vendor_prices) {
-            // Fetch details of the new vendors and filter out existing vendors
             const vendorIds = vendor_prices.map((vp: any) => vp.vendor_id);
             newVendors = await Shop.find({ _id: { $in: vendorIds, $nin: existingVendors } });
           }
 
-          // Combine existing vendors and new vendors
           const mergedVendors: any[] | IShop[] = [...existingVendors, ...newVendors];
 
-          // Create the updatedProduct object
           const updatedProduct: any = {
             product_name: product_name,
             product_description: product_description,
             category: category._id,
             product_image: cloudinaryResult.secure_url,
             vendors: mergedVendors.map((vendor) => (vendor instanceof Types.ObjectId ? vendor : vendor._id)),
-            product_specifications: specifications, // Include specifications in the update
+            product_specifications: specifications,
             vendor_prices: vendor_prices,
+            our_review: our_review,
           };
 
           const updatedProductResult = await Products.findByIdAndUpdate(productId, updatedProduct, {
@@ -356,8 +352,6 @@ export const removeProductSpecification = async (req: Request, res: Response): P
           });
           return;
       }
-
-      // Check if product_specifications is defined
       if (!product.product_specifications) {
           res.status(400).json({
               status: false,
@@ -365,19 +359,14 @@ export const removeProductSpecification = async (req: Request, res: Response): P
           });
           return;
       }
-
-      // Find and remove the specification from the product
       const updatedSpecifications = product.product_specifications.filter(
           (specification: any) => specification._id.toString() !== specificationId
       );
-
-      // Update the product with the new specifications
       const updatedProduct = await Products.findByIdAndUpdate(
           productId,
           { product_specifications: updatedSpecifications },
           { new: true }
       );
-
       res.status(200).json({
           status: true,
           message: 'Specification removed successfully',

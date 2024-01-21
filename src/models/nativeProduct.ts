@@ -27,6 +27,10 @@ const nativeProductSchema: Schema = new Schema(
             type: String,
             required: false
         },
+        our_review: {
+            type: String,
+            required: false
+        },
         image: {
             type: String,
             required: false
