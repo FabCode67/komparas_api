@@ -9,6 +9,6 @@ const upload = multer({ storage });
 
 const router: Router = Router();
 
-router.post('/product_images/:product_id', isAdminAuthenticat, upload.single('product_image'), addProductImage);
+router.post('/product_images/:product_id', upload.single('product_image'), addProductImage);
 
 export default router;
