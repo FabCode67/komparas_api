@@ -19,6 +19,27 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
   }
 }
 
+export const getAllProductsWithCategoryName = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const products: IProducts[] = await Products.find().maxTimeMS(30000);
+    const productsWithCategoryName: IProducts[] = await Promise.all(products.map(async (product: IProducts) => {
+      const category = await Category.findById(product.category);
+      return {
+        ...product.toObject(),
+        category_name: category?.name,
+      };
+    }));
+
+    res.status(200).json({ products: productsWithCategoryName });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: false,
+      message: 'An error occurred while fetching products',
+    });
+  }
+}
+
 
 export const getProductsWithImages = async (req: Request, res: Response): Promise<void> => {
   try {

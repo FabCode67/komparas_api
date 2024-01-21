@@ -9,7 +9,8 @@ import {
     getProductsByCategory,
     getSingleProductWithImages,
     updateProduct,
-    removeProductSpecification
+    removeProductSpecification,
+    getAllProductsWithCategoryName
 } from "../../controllers/products/productCrud";
 import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
 import multer from "multer";
@@ -21,6 +22,7 @@ const upload = multer({ storage });
 const router : Router = Router()
 
 router.get("/products", getProducts)
+router.get("/products/category", getAllProductsWithCategoryName)
 router.get("/products/images", getProductsWithImages)
 router.get("/products/images/:productId", getSingleProductWithImages)
 router.get("/products/:productId", getProductById)
