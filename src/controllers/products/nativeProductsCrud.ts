@@ -8,8 +8,6 @@ export const addNativeProduct = async (req: Request, res: Response): Promise<voi
     try {
         const { name, description, category, price, quantity, location, image } = req.body;
         const imageFile = req.file;
-  console.log(req.body);
-  
         // Check if at least one of the required fields is present
         if (!name || !description || !category || !price || !quantity || !location  ) {
             res.status(400).json({
