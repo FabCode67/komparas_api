@@ -17,7 +17,6 @@ export const addNativeProduct = async (req: Request, res: Response): Promise<voi
             return;
         }
 
-        // Check if product with the same name already exists
 
         const existingProduct: INativeProducts | null = await NativeProducts.findOne({ name: name });
         if (existingProduct) {

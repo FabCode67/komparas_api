@@ -50,11 +50,6 @@ export const getAllInfoOFProductsOnComparison = async (
             throw error;
         }
 }
-
-
-
-
-
 export const getProductComparisonByUser = async (
     req: Request,
     res: Response
