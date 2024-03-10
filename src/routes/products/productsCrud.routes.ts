@@ -10,7 +10,8 @@ import {
     getSingleProductWithImages,
     updateProduct,
     removeProductSpecification,
-    getAllProductsWithCategoryName
+    getAllProductsWithCategoryName,
+    getProductsByVendor
 } from "../../controllers/products/productCrud";
 import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
 import multer from "multer";
@@ -32,5 +33,6 @@ router.delete("/products/:productId", deleteProduct)
 router.get('/products/:category_id', getProductsByCategory);
 router.get('/products/category/:category_name', getProductsByCategory);
 router.delete('/products/:productId/specifications/:specificationId', removeProductSpecification);
+router.get('/products/vendor/:vendorId', getProductsByVendor);
 
 export default router

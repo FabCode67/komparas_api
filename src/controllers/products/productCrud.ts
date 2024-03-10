@@ -357,6 +357,8 @@ export const getProductsByCategory = async (req: Request, res: Response): Promis
 
 
 
+
+
 export const removeProductSpecification = async (req: Request, res: Response): Promise<void> => {
   try {
       const productId = req.params.productId;
@@ -398,5 +400,20 @@ export const removeProductSpecification = async (req: Request, res: Response): P
           error: error,
           message: 'An error occurred while removing the specification',
       });
+  }
+};
+
+export const getProductsByVendor = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const vendorId = req.params.vendorId;
+    const products: IProducts[] = await Products.find({ vendors: vendorId });
+
+    res.status(200).json({ products });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: false,
+      message: 'An error occurred while fetching products by vendor',
+    });
   }
 };

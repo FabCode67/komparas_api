@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Shop from '../../models/shop';
 import { IShop } from '../../types/shop';
 
+
 // Get all shops
 export const getAllShops = async (req: Request, res: Response): Promise<void> => {
     try {
