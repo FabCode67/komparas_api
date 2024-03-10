@@ -13,6 +13,11 @@
         [x: string]: any;
         userId: string;
         productId: string;
+        product?: any; // Include this field for storing the product information
+
     }
 
     export default IComparison;
+
+    import { Document, Schema } from "mongoose";
+
