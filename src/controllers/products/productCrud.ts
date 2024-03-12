@@ -19,6 +19,58 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
   }
 }
 
+export const getProductById = async (req: Request, res: Response): Promise<void> => {
+  try {
+const productIds = (req.query.productIds as string)?.split(',') ?? [];    console.log("[[[[[[[[[[[[[[[[[[",productIds);
+    
+    const product = await Products.find({ _id: { $in: productIds } });
+    if (!product) {
+      res.status(404).json({
+        status: false,
+        message: "Product not found",
+      });
+      return;
+    }
+    res.status(200).json({
+      status: true,
+      product,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: false,
+      message: "An error occurred while retrieving the product",
+    });
+  }
+};
+
+
+
+export const getSingleProductById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const productId = req.params.productId;
+    const product = await Products.findById(productId);
+    if (!product) {
+      res.status(404).json({
+        status: false,
+        message: "Product not found",
+      });
+      return;
+    }
+    res.status(200).json({
+      status: true,
+      product,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: false,
+      message: "An error occurred while retrieving the product",
+    });
+  }
+}
+
+
 export const getAllProductsWithCategoryName = async (req: Request, res: Response): Promise<void> => {
   try {
     const products: IProducts[] = await Products.find().maxTimeMS(30000);
@@ -285,34 +337,33 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       message: 'An error occurred while updating the product',
     });
   }
-};
+ };
 
 
 
-export const getProductById = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const productId = req.params.productId;
-    const product = await Products.findById(productId);
-    if (!product) {
-      res.status(404).json({
-        status: false,
-        message: "Product not found",
-      });
-      return;
-    }
-
-    res.status(200).json({
-      status: true,
-      product,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      status: false,
-      message: "An error occurred while retrieving the product",
-    });
-  }
-};
+// export const getProductById = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const productId = req.params.productId;
+//     const product = await Products.findById(productId);
+//     if (!product) {
+//       res.status(404).json({
+//         status: false,
+//         message: "Product not found",
+//       });
+//       return;
+//     }
+//     res.status(200).json({
+//       status: true,
+//       product,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       status: false,
+//       message: "An error occurred while retrieving the product",
+//     });
+//   }
+// };
 
 
 export const getProductsByCategory = async (req: Request, res: Response): Promise<void> => {
