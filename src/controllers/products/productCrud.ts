@@ -12,12 +12,21 @@ import { Types } from 'mongoose';
 
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const products: IProducts[] = await Products.find().maxTimeMS(30000);
-    res.status(200).json({ products })
+    const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : 0;
+    const products: IProducts[] = await Products.find({
+      'vendor_prices.price': { $gte: minPrice }
+    }).maxTimeMS(30000);
+
+    res.status(200).json({ products });
   } catch (error) {
-    throw error
+    console.error(error);
+    res.status(500).json({
+      status: false,
+      message: "An error occurred while retrieving the products",
+    });
   }
 }
+
 
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
