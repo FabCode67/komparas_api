@@ -44,6 +44,11 @@ const productSchema = new Schema<IProducts>({
         ref: 'Shop',
         required: true,
       },
+      vendor_name: {
+        type: String,
+        ref: 'Shop',
+        required: true,
+      },
       price: {
         type: Number,
         required: true,
