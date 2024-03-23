@@ -13,8 +13,10 @@ import { Types } from 'mongoose';
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : 0;
+    const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice as string) : Number.MAX_SAFE_INTEGER;
+
     const products: IProducts[] = await Products.find({
-      'vendor_prices.price': { $gte: minPrice }
+      'vendor_prices.price': { $gte: minPrice, $lte: maxPrice }
     }).maxTimeMS(30000);
 
     res.status(200).json({ products });
