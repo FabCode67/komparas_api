@@ -14,10 +14,26 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
   try {
     const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : 0;
     const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice as string) : Number.MAX_SAFE_INTEGER;
+    const categoryId = req.query.category;
+    const vendorId = req.query.vendor_id;
+    const ram = req.query.ram;
 
-    const products: IProducts[] = await Products.find({
+    
+    let query: any = {
       'vendor_prices.price': { $gte: minPrice, $lte: maxPrice }
-    }).maxTimeMS(30000);
+    };
+
+    if (categoryId) {
+      query.category = categoryId;
+    }
+    if (vendorId) {
+      query['vendor_prices.vendor_id'] = vendorId; 
+    }
+    if (ram) {
+      query['product_specifications.key'] = 'RAM'; // Check for RAM key in product_specifications
+      query['product_specifications.value'] = ram; // Check for specific RAM value
+    }
+    const products: IProducts[] = await Products.find(query).maxTimeMS(30000);
 
     res.status(200).json({ products });
   } catch (error) {
@@ -28,6 +44,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     });
   }
 }
+
 
 
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
