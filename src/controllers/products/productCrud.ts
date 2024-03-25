@@ -17,6 +17,9 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     const categoryId = req.query.category;
     const vendorId = req.query.vendor_id;
     const ram = req.query.ram;
+    const storage = req.query.storage;
+    const camera = req.query.camera;
+    const types = req.query.types;
 
     
     let query: any = {
@@ -30,9 +33,23 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       query['vendor_prices.vendor_id'] = vendorId; 
     }
     if (ram) {
-      query['product_specifications.key'] = 'RAM'; // Check for RAM key in product_specifications
-      query['product_specifications.value'] = ram; // Check for specific RAM value
+      query['product_specifications.key'] = 'RAM'; 
+      query['product_specifications.value'] = ram;
     }
+   
+    if (storage) {
+      query['product_specifications.key'] = 'Storage'; 
+      query['product_specifications.value'] = storage;
+    }
+    if (camera) {
+      query['product_specifications.key'] = 'Camera'; 
+      query['product_specifications.value'] = camera;
+    }
+    if (types) {
+      query['product_specifications.key'] = 'Types'; 
+      query['product_specifications.value'] = types;
+    }
+   
     const products: IProducts[] = await Products.find(query).maxTimeMS(30000);
 
     res.status(200).json({ products });
