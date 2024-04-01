@@ -15,13 +15,12 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : 0;
     const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice as string) : Number.MAX_SAFE_INTEGER;
     const categoryId = req.query.category;
-    const vendorId = req.query.vendor_id;
+    const vendorIds = req.query.vendor_id ? (req.query.vendor_id as string).split(",") : [];
     const ram = req.query.ram;
     const storage = req.query.storage;
     const camera = req.query.camera;
     const types = req.query.types;
 
-    
     let query: any = {
       'vendor_prices.price': { $gte: minPrice, $lte: maxPrice }
     };
@@ -29,14 +28,13 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     if (categoryId) {
       query.category = categoryId;
     }
-    if (vendorId) {
-      query['vendor_prices.vendor_id'] = vendorId; 
+    if (vendorIds.length > 0) {
+      query['vendor_prices.vendor_id'] = { $in: vendorIds }; 
     }
     if (ram) {
       query['product_specifications.key'] = 'RAM'; 
       query['product_specifications.value'] = ram;
     }
-   
     if (storage) {
       query['product_specifications.key'] = 'Storage'; 
       query['product_specifications.value'] = storage;
@@ -49,7 +47,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       query['product_specifications.key'] = 'Types'; 
       query['product_specifications.value'] = types;
     }
-   
+
     const products: IProducts[] = await Products.find(query).maxTimeMS(30000);
 
     res.status(200).json({ products });
@@ -61,6 +59,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     });
   }
 }
+
 
 
 
