@@ -16,10 +16,10 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice as string) : Number.MAX_SAFE_INTEGER;
     const categoryId = req.query.category;
     const vendorIds = req.query.vendor_id ? (req.query.vendor_id as string).split(",") : [];
-    const ram = req.query.ram;
-    const storage = req.query.storage;
-    const camera = req.query.camera;
-    const types = req.query.types;
+    const ramValues = req.query.ram ? (req.query.ram as string).split(",") : [];
+    const storageValues = req.query.storage ? (req.query.storage as string).split(",") : [];
+    const cameraValues = req.query.camera ? (req.query.camera as string).split(",") : [];
+    const typesValues = req.query.types ? (req.query.types as string).split(",") : [];
 
     let query: any = {
       'vendor_prices.price': { $gte: minPrice, $lte: maxPrice }
@@ -31,21 +31,21 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     if (vendorIds.length > 0) {
       query['vendor_prices.vendor_id'] = { $in: vendorIds }; 
     }
-    if (ram) {
+    if (ramValues.length > 0) {
       query['product_specifications.key'] = 'RAM'; 
-      query['product_specifications.value'] = ram;
+      query['product_specifications.value'] = { $in: ramValues };
     }
-    if (storage) {
+    if (storageValues.length > 0) {
       query['product_specifications.key'] = 'Storage'; 
-      query['product_specifications.value'] = storage;
+      query['product_specifications.value'] = { $in: storageValues };
     }
-    if (camera) {
+    if (cameraValues.length > 0) {
       query['product_specifications.key'] = 'Camera'; 
-      query['product_specifications.value'] = camera;
+      query['product_specifications.value'] = { $in: cameraValues };
     }
-    if (types) {
+    if (typesValues.length > 0) {
       query['product_specifications.key'] = 'Types'; 
-      query['product_specifications.value'] = types;
+      query['product_specifications.value'] = { $in: typesValues };
     }
 
     const products: IProducts[] = await Products.find(query).maxTimeMS(30000);
@@ -59,9 +59,6 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     });
   }
 }
-
-
-
 
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
