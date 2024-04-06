@@ -10,10 +10,6 @@ const productSchema = new Schema<IProducts>({
       type: String,
       required: true,
     },
-    our_review: {
-      type: String,
-      required: true,
-    },
     product_image: {
       type: String,
       required: true,
@@ -29,6 +25,16 @@ const productSchema = new Schema<IProducts>({
       required: true,
     },
     product_specifications: [{
+      key: {
+        type: String,
+        required: true,
+      },
+      value: {
+        type: String,
+        required: true,
+      },
+    }],
+    our_review: [{
       key: {
         type: String,
         required: true,
