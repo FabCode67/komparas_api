@@ -176,15 +176,27 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
       return vendor;
     });
 
+    // add also the main product image into the product images array
+
+    const productImagesWithMainImage = [
+      {
+        _id: product._id,
+        product_image: product.product_image,
+        product: product._id,
+      },
+      ...productImages,
+    ];
+
+
     const vendorDetails = await Promise.all(vendorDetailsPromises);
 
     res.status(200).json({
       status: true,
       product: {
         ...product.toObject(),
-        product_images: productImages,
+        product_images: productImagesWithMainImage,
         category: productCategory,
-        vendors: vendorDetails, // Return an array of vendor details
+        vendors: vendorDetails, 
       },
     });
   } catch (error) {
@@ -229,7 +241,6 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             });
             return;
           }
-
           const vendors = await Shop.find({ _id: { $in: vendor_prices.map((vp: any) => vp.vendor_id) } });
           const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
             key: spec?.key?.toString(),
@@ -239,9 +250,6 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             key: rev?.key?.toString(),
             value: rev?.value?.toString(),
           }));
-        
-         
-
           const newProduct: IProducts = new Products({
             product_name: product_name,
             product_description: product_description,
