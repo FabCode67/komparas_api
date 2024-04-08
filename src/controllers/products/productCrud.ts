@@ -8,7 +8,6 @@ import streamifier from "streamifier";
 import Shop from "../../models/shop";
 import { IShop } from "../../types/shop";
 import { Types } from 'mongoose';
-import { spec } from "node:test/reporters";
 
 
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
@@ -235,12 +234,6 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             key: spec?.key?.toString(),
             value: spec?.value?.toString(),
           }));
-          const productReview: Array<{ key: string; value: string }> = our_review?.map((rev: any) => ({
-            key: rev?.key?.toString(),
-            value: rev?.value?.toString(),
-          }));
-        
-         
 
           const newProduct: IProducts = new Products({
             product_name: product_name,
@@ -250,7 +243,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             vendors: vendors?.map(vendor => vendor._id),
             product_specifications: productSpecifications,
             vendor_prices: vendor_prices,
-            our_review: productReview,
+            our_review: our_review,
           });
 
           const newProductResult: IProducts = await newProduct.save();
