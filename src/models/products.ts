@@ -60,6 +60,10 @@ const productSchema = new Schema<IProducts>({
         required: true,
       },
     }],
+    our_price: {
+      type: Number,
+      required: true,
+    },
   }, {
     timestamps: true,
   });

@@ -211,7 +211,7 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
 
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { product_name, product_description, category_name, vendor_prices, specifications, our_review } = req.body;
+    const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price } = req.body;
     const imageFile = req.file;
 
     if (!imageFile) {
@@ -256,6 +256,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             category: category._id,
             product_image: cloudinaryResult.secure_url,
             vendors: vendors?.map(vendor => vendor._id),
+            our_price: our_price,
             product_specifications: productSpecifications,
             vendor_prices: vendor_prices,
             our_review: productReview,
