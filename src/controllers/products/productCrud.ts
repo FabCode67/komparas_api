@@ -335,7 +335,6 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
           });
         } else {
           const category = await Category.findOne({ name: category_name });
-
           if (!category) {
             res.status(404).json({
               status: false,
@@ -343,21 +342,17 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
             });
             return;
           }
-
           let existingVendors: Types.ObjectId[] | IShop[] = [];
           const existingProduct = await Products.findById(productId);
           if (existingProduct) {
             existingVendors = existingProduct.vendors;
           }
-
           let newVendors: IShop[] = [];
           if (vendor_prices) {
             const vendorIds = vendor_prices.map((vp: any) => vp.vendor_id);
             newVendors = await Shop.find({ _id: { $in: vendorIds, $nin: existingVendors } });
           }
-
           const mergedVendors: any[] | IShop[] = [...existingVendors, ...newVendors];
-
           const updatedProduct: any = {
             product_name: product_name,
             product_description: product_description,
@@ -368,11 +363,9 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
             vendor_prices: vendor_prices,
             our_review: our_review,
           };
-
           const updatedProductResult = await Products.findByIdAndUpdate(productId, updatedProduct, {
             new: true,
           });
-
           res.status(200).json({
             message: 'Product updated successfully',
             product: updatedProductResult,
@@ -380,11 +373,9 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
         }
       }
     );
-
     if (!result) {
       throw new Error('Cloudinary upload failed');
     }
-
     streamifier.createReadStream(imageFile.buffer).pipe(result);
   } catch (err) {
     console.error(err);
