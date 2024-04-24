@@ -25,5 +25,4 @@ export default {
     nativeProductsRoutes,
     comparisionRoutes,
     DayphoneRoutes
-    // newCatrouters
 };

@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { addDayPhone } from "../../controllers/offers/DayPhone";
+import { addDayPhone, updateDayProduct, getDayProducts } from "../../controllers/offers/DayPhone";
 import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
 import multer from "multer";
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const router: Router = Router();
 router.post('/dayphone', upload.single('image'), addDayPhone);
+router.put('/dayphone', upload.single('image'), updateDayProduct);
+router.get('/dayphone', getDayProducts);
 export default router;

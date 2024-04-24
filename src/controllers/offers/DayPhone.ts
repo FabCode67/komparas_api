@@ -18,6 +18,16 @@ export const addDayPhone = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
+        // Check if other items exist in the table
+        const existingItems = await DayPhone.find({});
+        if (existingItems.length > 0) {
+            res.status(400).json({
+                status: false,
+                message: 'Only one item is required, please update an existing one',
+            });
+            return;
+        }
+
         const result: UploadStream = cloudinaryV2.uploader.upload_stream(
             { folder: 'image' },
             async (error, cloudinaryResult: any) => {
@@ -66,10 +76,11 @@ export const getDayProducts = async (req: Request, res: Response): Promise<void>
         res.status(500).send(error);
     }
 }
-
 export const updateDayProduct = async (req: Request, res: Response): Promise<void> => {
     try {
-        const dayProduct: IDayPhone | null = await DayPhone.findById(req.params.id);
+        const dayProducts: IDayPhone[] = await DayPhone.find();
+        const dayProduct: IDayPhone | null = dayProducts[0]; // Get the single item
+
         const dimage = req.file;
 
         if(!dimage) {
@@ -79,6 +90,7 @@ export const updateDayProduct = async (req: Request, res: Response): Promise<voi
             });
             return;
         }
+        
 
         if (dayProduct) {
             dayProduct.name = req.body.name;
@@ -114,10 +126,6 @@ export const updateDayProduct = async (req: Request, res: Response): Promise<voi
             res.status(404).send('Product not found');
         }
     } catch (error) {
-        res.status(500
-        ).send(error);
+        res.status(500).send(error);
     }
 }
-
-
-
