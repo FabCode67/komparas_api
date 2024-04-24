@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { addProductImage } from "../../controllers/products/productImages";
+import { addProductImage, getProductImages, upDateProductImage, deleteProductImage } from "../../controllers/products/productImages";
 import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
 import multer from "multer";
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const router: Router = Router();
 router.post('/product_images/:product_id', upload.single('product_image'), addProductImage);
+router.get('/product_images/:product_id', getProductImages);
+router.put('/product_images/:product_id/:product_image_id', upDateProductImage);
 export default router;

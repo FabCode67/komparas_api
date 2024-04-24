@@ -55,6 +55,30 @@ export const addProductImage = async (req: Request, res: Response): Promise<void
     }
 };
 
+export const getProductImages = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { product_id } = req.params;
+
+        if (!product_id) {
+            res.status(400).json({
+                status: false,
+                message: 'Please provide product_id',
+            });
+            return;
+        }
+
+        const productImages = await ProductImages.find({ product: product_id });
+
+        res.status(200).json(productImages);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: false,
+            message: 'An error occurred while fetching the product images',
+        });
+    }
+}
+
 export const deleteProductImage = async (req: Request, res: Response): Promise<void> => {
     try {
         const { product_id, product_image_id } = req.params;
@@ -78,6 +102,33 @@ export const deleteProductImage = async (req: Request, res: Response): Promise<v
         res.status(500).json({
             status: false,
             message: 'An error occurred while deleting the product image',
+        });
+    }
+}
+
+export const upDateProductImage = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { product_id, product_image_id } = req.params;
+
+        if (!product_id || !product_image_id) {
+            res.status(400).json({
+                status: false,
+                message: 'Please provide product_id and product_image_id',
+            });
+            return;
+        }
+
+        const updatedProductImage = await ProductImages.findByIdAndUpdate(product_image_id, req.body, { new: true });
+
+        res.status(200).json({
+            message: 'Product image updated successfully',
+            productImage: updatedProductImage,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: false,
+            message: 'An error occurred while updating the product image',
         });
     }
 }

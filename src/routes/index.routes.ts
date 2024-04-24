@@ -10,6 +10,7 @@ import shopRoutes from "./shop/shop.routes"
 import customerRoutes from "./customer/customer.routes"
 import nativeProductsRoutes from "./products/nativeProducts.routes"
 import comparisionRoutes from "./comparision/comparision.routes"
+import DayphoneRoutes from "./products/offer.routes"
 
 export default {
     userRoutes,
@@ -22,6 +23,7 @@ export default {
     shopRoutes,
     customerRoutes,
     nativeProductsRoutes,
-    comparisionRoutes
+    comparisionRoutes,
+    DayphoneRoutes
     // newCatrouters
 };

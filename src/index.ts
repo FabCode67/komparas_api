@@ -49,6 +49,7 @@ app.use(allRoutes.shopRoutes);
 app.use(allRoutes.customerRoutes);
 app.use(allRoutes.nativeProductsRoutes);
 app.use(allRoutes.comparisionRoutes);
+app.use(allRoutes.DayphoneRoutes);
 // app.use(allRoutes.newCatrouters);
 app.use('/api-docs',swaggerUI.serve,swaggerUI.setup(docs));
 
