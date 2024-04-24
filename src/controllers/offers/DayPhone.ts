@@ -6,11 +6,11 @@ import streamifier from "streamifier";
 
 export const addDayPhone = async (req: Request, res: Response): Promise<void> => {
     try {
-        const imageFile = req.file;
+        const image = req.file;
 
         const { name, description, offer, price } = req.body;
 
-        if (!imageFile) {
+        if (!image) {
             res.status(400).json({
                 status: false,
                 message: 'Please provide image file',
@@ -19,7 +19,7 @@ export const addDayPhone = async (req: Request, res: Response): Promise<void> =>
         }
 
         const result: UploadStream = cloudinaryV2.uploader.upload_stream(
-            { folder: 'product-images' },
+            { folder: 'image' },
             async (error, cloudinaryResult: any) => {
                 if (error) {
                     console.error(error);
@@ -33,7 +33,7 @@ export const addDayPhone = async (req: Request, res: Response): Promise<void> =>
                         description,
                         offer,
                         price,
-                        product_image: cloudinaryResult.secure_url,
+                        image: cloudinaryResult.secure_url,
                     });
 
                     const DayPhoneProductImageResult: IDayPhone = await DayPhoneProductImage.save();
@@ -48,7 +48,7 @@ export const addDayPhone = async (req: Request, res: Response): Promise<void> =>
         if (!result) {
             throw new Error("Cloudinary upload failed");
         }
-        streamifier.createReadStream(imageFile.buffer).pipe(result);
+        streamifier.createReadStream(image.buffer).pipe(result);
     } catch (err) {
         console.error(err);
         res.status(500).json({
@@ -70,9 +70,9 @@ export const getDayProducts = async (req: Request, res: Response): Promise<void>
 export const updateDayProduct = async (req: Request, res: Response): Promise<void> => {
     try {
         const dayProduct: IDayPhone | null = await DayPhone.findById(req.params.id);
-        const product_image = req.file;
+        const dimage = req.file;
 
-        if(!product_image) {
+        if(!dimage) {
             res.status(400).json({
                 status: false,
                 message: 'Please provide an image file',
@@ -96,7 +96,7 @@ export const updateDayProduct = async (req: Request, res: Response): Promise<voi
                             message: 'An error occurred while uploading the image to Cloudinary',
                         });
                     } else {
-                        dayProduct.product_image = cloudinaryResult.secure_url;
+                        dayProduct.image = cloudinaryResult.secure_url;
                         const updatedDayProduct: IDayPhone = await dayProduct.save();
                         res.status(200).json({
                             message: 'Product updated successfully',
@@ -109,7 +109,7 @@ export const updateDayProduct = async (req: Request, res: Response): Promise<voi
             if (!result) {
                 throw new Error("Cloudinary upload failed");
             }
-            streamifier.createReadStream(product_image.buffer).pipe(result);
+            streamifier.createReadStream(dimage.buffer).pipe(result);
         } else {
             res.status(404).send('Product not found');
         }
