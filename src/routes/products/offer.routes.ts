@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { addDayPhone, updateDayProduct, getDayProducts } from "../../controllers/offers/DayPhone";
+import { addPromo1, getPromo1, updatePromo1 } from "../../controllers/offers/Promo1";
 import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
 import multer from "multer";
 const storage = multer.memoryStorage();
@@ -8,4 +9,7 @@ const router: Router = Router();
 router.post('/dayphone', upload.single('image'), addDayPhone);
 router.put('/dayphone', upload.single('image'), updateDayProduct);
 router.get('/dayphone', getDayProducts);
+router.post('/promo1', upload.single('image'), addPromo1);
+router.put('/promo1', upload.single('image'), updatePromo1);
+router.get('/promo1', getPromo1);
 export default router;
