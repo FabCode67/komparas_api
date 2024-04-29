@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
 import { IPromo3 } from "../../types/Promo3";
 import Promo3 from "../../models/Promo3";
-import { v2 as cloudinaryV2, UploadApiResponse, UploadStream } from "cloudinary";
+import { v2 as cloudinaryV2, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
 
 export const addPromo3 = async (req: Request, res: Response): Promise<void> => {
@@ -76,7 +76,7 @@ export const getPromo3 = async (req: Request, res: Response): Promise<void> => {
         res.status(500).send(error);
     }
 }
-export const updateProm3 = async (req: Request, res: Response): Promise<void> => {
+export const updatePromo3 = async (req: Request, res: Response): Promise<void> => {
     try {
         const dayProducts: IPromo3[] = await Promo3.find();
         const dayProduct: IPromo3 | null = dayProducts[0]; // Get the single item

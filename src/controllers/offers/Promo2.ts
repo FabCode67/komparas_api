@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
 import { IPromo2 } from "../../types/Promo2";
 import Promo2 from "../../models/Promo2";
-import { v2 as cloudinaryV2, UploadApiResponse, UploadStream } from "cloudinary";
+import { v2 as cloudinaryV2, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
 
 export const addPromo2 = async (req: Request, res: Response): Promise<void> => {
