@@ -461,10 +461,6 @@ export const getProductsByCategory = async (req: Request, res: Response): Promis
   }
 };
 
-
-
-
-
 export const removeProductSpecification = async (req: Request, res: Response): Promise<void> => {
   try {
       const productId = req.params.productId;
