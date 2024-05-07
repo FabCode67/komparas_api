@@ -69,6 +69,11 @@ const productSchema = new Schema<IProducts>({
       type: Number,
       required: true,
     },
+  availableStorages: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Storage',
+    required: true,
+  }],
   }, {
     timestamps: true,
   });

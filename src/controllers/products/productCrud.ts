@@ -30,22 +30,22 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       query.category = categoryId;
     }
     if (vendorIds.length > 0) {
-      query['vendor_prices.vendor_id'] = { $in: vendorIds }; 
+      query['vendor_prices.vendor_id'] = { $in: vendorIds };
     }
     if (ramValues.length > 0) {
-      query['product_specifications.key'] = 'RAM'; 
+      query['product_specifications.key'] = 'RAM';
       query['product_specifications.value'] = { $in: ramValues };
     }
     if (storageValues.length > 0) {
-      query['product_specifications.key'] = 'Storage'; 
+      query['product_specifications.key'] = 'Storage';
       query['product_specifications.value'] = { $in: storageValues };
     }
     if (cameraValues.length > 0) {
-      query['product_specifications.key'] = 'Camera'; 
+      query['product_specifications.key'] = 'Camera';
       query['product_specifications.value'] = { $in: cameraValues };
     }
     if (typesValues.length > 0) {
-      query['product_specifications.key'] = 'Types'; 
+      query['product_specifications.key'] = 'Types';
       query['product_specifications.value'] = { $in: typesValues };
     }
 
@@ -63,8 +63,8 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
-const productIds = (req.query.productIds as string)?.split(',') ?? [];    console.log("[[[[[[[[[[[[[[[[[[",productIds);
-    
+    const productIds = (req.query.productIds as string)?.split(',') ?? []; console.log("[[[[[[[[[[[[[[[[[[", productIds);
+
     const product = await Products.find({ _id: { $in: productIds } });
     if (!product) {
       res.status(404).json({
@@ -196,7 +196,7 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
         ...product.toObject(),
         product_images: productImagesWithMainImage,
         category: productCategory,
-        vendors: vendorDetails, 
+        vendors: vendorDetails,
       },
     });
   } catch (error) {
@@ -210,7 +210,7 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
 
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price } = req.body;
+    const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
     const imageFile = req.file;
 
     if (!imageFile) {
@@ -241,32 +241,34 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             return;
           }
           const vendors = await Shop.find({ _id: { $in: vendor_prices.map((vp: any) => vp.vendor_id) } });
-const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
-  key: spec?.key?.toString(),
-  value: spec?.value?.toString(),
-}));
-const productReview: Array<{ key: string; value: string }> = our_review?.map((rev: any) => ({
-  key: rev?.key?.toString(),
-  value: rev?.value?.toString(),
-}));
-const newVendorPrices = vendor_prices.map((vp: any) => ({
-  vendor_id: vp.vendor_id,
-  vendor_name: vp.vendor_name,
-  price: vp.price,
-  colors: vp.colors,
-  color: vp.color, // Add the color value here
-}));
-const newProduct: IProducts = new Products({
-  product_name: product_name,
-  product_description: product_description,
-  category: category._id,
-  product_image: cloudinaryResult.secure_url,
-  vendors: vendors?.map(vendor => vendor._id),
-  our_price: our_price,
-  product_specifications: productSpecifications,
-  vendor_prices: newVendorPrices, // Use the updated vendor_prices array
-  our_review: productReview,
-});
+          const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
+            key: spec?.key?.toString(),
+            value: spec?.value?.toString(),
+          }));
+          const productReview: Array<{ key: string; value: string }> = our_review?.map((rev: any) => ({
+            key: rev?.key?.toString(),
+            value: rev?.value?.toString(),
+          }));
+          const newVendorPrices = vendor_prices.map((vp: any) => ({
+            vendor_id: vp.vendor_id,
+            vendor_name: vp.vendor_name,
+            price: vp.price,
+            colors: vp.colors,
+            color: vp.color, // Add the color value here
+          }));
+
+          const newProduct: IProducts = new Products({
+            product_name: product_name,
+            product_description: product_description,
+            category: category._id,
+            product_image: cloudinaryResult.secure_url,
+            vendors: vendors?.map(vendor => vendor._id),
+            our_price: our_price,
+            product_specifications: productSpecifications,
+            vendor_prices: newVendorPrices,
+            our_review: productReview,
+            availableStorages: availableStorages,
+          });
 
 
           const newProductResult: IProducts = await newProduct.save();
@@ -391,7 +393,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       message: 'An error occurred while updating the product',
     });
   }
- };
+};
 
 
 
@@ -463,45 +465,45 @@ export const getProductsByCategory = async (req: Request, res: Response): Promis
 
 export const removeProductSpecification = async (req: Request, res: Response): Promise<void> => {
   try {
-      const productId = req.params.productId;
-      const specificationId = req.params.specificationId;
+    const productId = req.params.productId;
+    const specificationId = req.params.specificationId;
 
-      const product = await Products.findById(productId);
+    const product = await Products.findById(productId);
 
-      if (!product) {
-          res.status(404).json({
-              status: false,
-              message: 'Product not found',
-          });
-          return;
-      }
-      if (!product.product_specifications) {
-          res.status(400).json({
-              status: false,
-              message: 'Product does not have any specifications',
-          });
-          return;
-      }
-      const updatedSpecifications = product.product_specifications.filter(
-          (specification: any) => specification._id.toString() !== specificationId
-      );
-      const updatedProduct = await Products.findByIdAndUpdate(
-          productId,
-          { product_specifications: updatedSpecifications },
-          { new: true }
-      );
-      res.status(200).json({
-          status: true,
-          message: 'Specification removed successfully',
-          product: updatedProduct,
+    if (!product) {
+      res.status(404).json({
+        status: false,
+        message: 'Product not found',
       });
+      return;
+    }
+    if (!product.product_specifications) {
+      res.status(400).json({
+        status: false,
+        message: 'Product does not have any specifications',
+      });
+      return;
+    }
+    const updatedSpecifications = product.product_specifications.filter(
+      (specification: any) => specification._id.toString() !== specificationId
+    );
+    const updatedProduct = await Products.findByIdAndUpdate(
+      productId,
+      { product_specifications: updatedSpecifications },
+      { new: true }
+    );
+    res.status(200).json({
+      status: true,
+      message: 'Specification removed successfully',
+      product: updatedProduct,
+    });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({
-          status: false,
-          error: error,
-          message: 'An error occurred while removing the specification',
-      });
+    console.error(error);
+    res.status(500).json({
+      status: false,
+      error: error,
+      message: 'An error occurred while removing the specification',
+    });
   }
 };
 
