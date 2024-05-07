@@ -7,5 +7,6 @@ export interface IShop extends Document {
     phone?: string;
     email?: string;
     description?: string;
+    colors:any
 }
 

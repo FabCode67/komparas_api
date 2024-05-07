@@ -208,7 +208,6 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
   }
 };
 
-
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price } = req.body;
@@ -242,25 +241,33 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             return;
           }
           const vendors = await Shop.find({ _id: { $in: vendor_prices.map((vp: any) => vp.vendor_id) } });
-          const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
-            key: spec?.key?.toString(),
-            value: spec?.value?.toString(),
-          }));
-          const productReview: Array<{ key: string; value: string }> = our_review?.map((rev: any) => ({
-            key: rev?.key?.toString(),
-            value: rev?.value?.toString(),
-          }));
-          const newProduct: IProducts = new Products({
-            product_name: product_name,
-            product_description: product_description,
-            category: category._id,
-            product_image: cloudinaryResult.secure_url,
-            vendors: vendors?.map(vendor => vendor._id),
-            our_price: our_price,
-            product_specifications: productSpecifications,
-            vendor_prices: vendor_prices,
-            our_review: productReview,
-          });
+const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
+  key: spec?.key?.toString(),
+  value: spec?.value?.toString(),
+}));
+const productReview: Array<{ key: string; value: string }> = our_review?.map((rev: any) => ({
+  key: rev?.key?.toString(),
+  value: rev?.value?.toString(),
+}));
+const newVendorPrices = vendor_prices.map((vp: any) => ({
+  vendor_id: vp.vendor_id,
+  vendor_name: vp.vendor_name,
+  price: vp.price,
+  colors: vp.colors,
+  color: vp.color, // Add the color value here
+}));
+const newProduct: IProducts = new Products({
+  product_name: product_name,
+  product_description: product_description,
+  category: category._id,
+  product_image: cloudinaryResult.secure_url,
+  vendors: vendors?.map(vendor => vendor._id),
+  our_price: our_price,
+  product_specifications: productSpecifications,
+  vendor_prices: newVendorPrices, // Use the updated vendor_prices array
+  our_review: productReview,
+});
+
 
           const newProductResult: IProducts = await newProduct.save();
           res.status(201).json({
@@ -284,7 +291,6 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
     });
   }
 };
-
 
 export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -411,6 +417,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
 //       message: "An error occurred while retrieving the product",
 //     });
 //   }
+
 // };
 
 

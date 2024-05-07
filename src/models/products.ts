@@ -45,22 +45,26 @@ const productSchema = new Schema<IProducts>({
         required: true,
       },
     }],
-    vendor_prices: [{
-      vendor_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'Shop',
-        required: true,
-      },
-      vendor_name: {
-        type: String,
-        ref: 'Shop',
-        
-      },
-      price: {
-        type: Number,
-        required: true,
-      },
-    }],
+   vendor_prices: [{
+  vendor_id: {
+    type: Schema.Types.ObjectId,
+    ref: 'Shop',
+    required: true,
+  },
+  vendor_name: {
+    type: String,
+    ref: 'Shop',
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  colors: [{
+    type: String,
+    required: true,
+  }],
+}],
+
     our_price: {
       type: Number,
       required: true,
