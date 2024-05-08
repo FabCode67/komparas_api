@@ -220,7 +220,6 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
       });
       return;
     }
-
     const result: UploadStream = cloudinaryV2.uploader.upload_stream(
       { folder: 'product-images' },
       async (error, cloudinaryResult: any) => {
@@ -232,7 +231,6 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
           });
         } else {
           const category = await Category.findOne({ name: category_name });
-
           if (!category) {
             res.status(404).json({
               status: false,
@@ -249,6 +247,9 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             key: rev?.key?.toString(),
             value: rev?.value?.toString(),
           }));
+          const productAvailableStorages : Array<{ value: string }> = availableStorages?.map((st: any) => ({
+            value: st?.value?.toString(),
+          }))
           const newVendorPrices = vendor_prices.map((vp: any) => ({
             vendor_id: vp.vendor_id,
             vendor_name: vp.vendor_name,
@@ -267,10 +268,8 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             product_specifications: productSpecifications,
             vendor_prices: newVendorPrices,
             our_review: productReview,
-            availableStorages: availableStorages,
+            availableStorages: productAvailableStorages,
           });
-
-
           const newProductResult: IProducts = await newProduct.save();
           res.status(201).json({
             message: 'Product added successfully',
@@ -293,7 +292,6 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
     });
   }
 };
-
 export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const productId = req.params.productId;

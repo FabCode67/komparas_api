@@ -20,8 +20,7 @@ interface IProducts extends Document {
   product_category:String;
   our_price:String;
   our_review?:Array<{ key: string; value: string }>;
-  availableStorages?:Array<{ key: string; value: string }
-  >;
+  availableStorages?:Array<{ value: string }>;
 }
 
 export { IProducts };
