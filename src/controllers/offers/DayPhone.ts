@@ -83,14 +83,14 @@ export const updateDayProduct = async (req: Request, res: Response): Promise<voi
 
         const dimage = req.file;
 
-        if(!dimage) {
+        if (!dimage) {
             res.status(400).json({
                 status: false,
                 message: 'Please provide an image file',
             });
             return;
         }
-        
+
 
         if (dayProduct) {
             dayProduct.name = req.body.name;

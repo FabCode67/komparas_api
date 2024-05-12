@@ -7,7 +7,6 @@ import streamifier from "streamifier";
 export const addPromo2 = async (req: Request, res: Response): Promise<void> => {
     try {
         const image = req.file;
-
         const { name, description, offer, price } = req.body;
 
         if (!image) {
@@ -83,14 +82,14 @@ export const updatePromo2 = async (req: Request, res: Response): Promise<void> =
 
         const dimage = req.file;
 
-        if(!dimage) {
+        if (!dimage) {
             res.status(400).json({
                 status: false,
                 message: 'Please provide an image file',
             });
             return;
         }
-        
+
 
         if (dayProduct) {
             dayProduct.name = req.body.name;
