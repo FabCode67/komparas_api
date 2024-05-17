@@ -53,10 +53,7 @@ app.use(allRoutes.DayphoneRoutes);
 // app.use(allRoutes.newCatrouters);
 app.use('/api-docs',swaggerUI.serve,swaggerUI.setup(docs));
 
-
 dotenv.config()
-
-
 let uri: string;
 uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@komparas.jx1hf07.mongodb.net/?retryWrites=true&w=majority`;
 mongoose

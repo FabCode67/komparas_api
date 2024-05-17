@@ -1,6 +1,6 @@
-import { Response, Request } from "express"
-import { IProducts } from '../../types/products'
-import Products from "../../models/products"
+import { Response, Request } from "express";
+import { IProducts } from '../../types/products';
+import Products from "../../models/products";
 import Category from "../../models/category";
 import productImage from "../../models/productImage";
 import { v2 as cloudinaryV2, UploadStream } from "cloudinary";
@@ -8,26 +8,27 @@ import streamifier from "streamifier";
 import Shop from "../../models/shop";
 import { IShop } from "../../types/shop";
 import { Types } from 'mongoose';
-import { spec } from "node:test/reporters";
-
 
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : 0;
-    const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice as string) : Number.MAX_SAFE_INTEGER;
-    const categoryId = req.query.category;
-    const vendorIds = req.query.vendor_id ? (req.query.vendor_id as string).split(",") : [];
-    const ramValues = req.query.ram ? (req.query.ram as string).split(",") : [];
-    const storageValues = req.query.storage ? (req.query.storage as string).split(",") : [];
-    const cameraValues = req.query.camera ? (req.query.camera as string).split(",") : [];
-    const typesValues = req.query.types ? (req.query.types as string).split(",") : [];
+    const minPrice = req.query.minPrice? parseInt(req.query.minPrice as string) : 0;
+    const maxPrice = req.query.maxPrice? parseInt(req.query.maxPrice as string) : Number.MAX_SAFE_INTEGER;
+    const categoryIds = req.query.category? (req.query.category as string).split(","): [];
+    const vendorIds = req.query.vendor_id? (req.query.vendor_id as string).split(",") : [];
+    const ramValues = req.query.ram? (req.query.ram as string).split(",") : [];
+    const storageValues = req.query.storage? (req.query.storage as string).split(",") : [];
+    const cameraValues = req.query.camera? (req.query.camera as string).split(",") : [];
+    const typesValues = req.query.types? (req.query.types as string).split(",") : [];
 
     let query: any = {
       'vendor_prices.price': { $gte: minPrice, $lte: maxPrice }
     };
 
-    if (categoryId) {
-      query.category = categoryId;
+    // Convert categoryIds to ObjectIds
+    const categoryObjectIds = categoryIds.map(id => new Types.ObjectId(id));
+
+    if (categoryIds.length > 0) {
+      query['category.category'] = {$in: categoryObjectIds};
     }
     if (vendorIds.length > 0) {
       query['vendor_prices.vendor_id'] = { $in: vendorIds };
