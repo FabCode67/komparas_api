@@ -9,27 +9,41 @@ import Shop from "../../models/shop";
 import { IShop } from "../../types/shop";
 import { Types } from 'mongoose';
 
+// import { Types } from 'mongoose';
+
+
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const minPrice = req.query.minPrice? parseInt(req.query.minPrice as string) : 0;
-    const maxPrice = req.query.maxPrice? parseInt(req.query.maxPrice as string) : Number.MAX_SAFE_INTEGER;
-    const categoryIds = req.query.category? (req.query.category as string).split(","): [];
-    const vendorIds = req.query.vendor_id? (req.query.vendor_id as string).split(",") : [];
-    const ramValues = req.query.ram? (req.query.ram as string).split(",") : [];
-    const storageValues = req.query.storage? (req.query.storage as string).split(",") : [];
-    const cameraValues = req.query.camera? (req.query.camera as string).split(",") : [];
-    const typesValues = req.query.types? (req.query.types as string).split(",") : [];
+    const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : 0;
+    const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice as string) : Number.MAX_SAFE_INTEGER;
+    const categoryIds = req.query.category ? (req.query.category as string).split(",").map(id => new Types.ObjectId(id)) : [];
+    const vendorIds = req.query.vendor_id ? (req.query.vendor_id as string).split(",") : [];
+    const ramValues = req.query.ram ? (req.query.ram as string).split(",") : [];
+    const storageValues = req.query.storage ? (req.query.storage as string).split(",") : [];
+    const cameraValues = req.query.camera ? (req.query.camera as string).split(",") : [];
+    const typesValues = req.query.types ? (req.query.types as string).split(",") : [];
 
     let query: any = {
       'vendor_prices.price': { $gte: minPrice, $lte: maxPrice }
     };
 
-    // Convert categoryIds to ObjectIds
-    const categoryObjectIds = categoryIds.map(id => new Types.ObjectId(id));
-
+    // Retrieve child categories
     if (categoryIds.length > 0) {
-      query['category.category'] = {$in: categoryObjectIds};
+      const parentCategories = await Category.find({ _id: { $in: categoryIds } });
+      const childCategoryIds: Types.ObjectId[] = [];
+
+      for (const parentCategory of parentCategories) {
+        const children = await Category.find({ parent_id: parentCategory._id });
+        children.forEach(child => {
+          childCategoryIds.push(child._id);
+        });
+      }
+
+      // Combine parent and child category IDs
+      const allCategoryIds = [...categoryIds, ...childCategoryIds];
+      query.category = { $in: allCategoryIds };
     }
+
     if (vendorIds.length > 0) {
       query['vendor_prices.vendor_id'] = { $in: vendorIds };
     }
@@ -61,6 +75,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     });
   }
 }
+
 
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
