@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const login_1 = require("../../controllers/auth/login");
+const subs_1 = __importDefault(require("../../controllers/subs/subs"));
+const subs_2 = require("../../controllers/subs/subs");
+const subs_3 = require("../../controllers/subs/subs");
+const forgotPassword_1 = require("../../controllers/auth/forgotPassword");
+const forgotPassword_2 = require("../../controllers/auth/forgotPassword");
+const router = (0, express_1.Router)();
+router.post("/login", login_1.login);
+router.post("/subscribe", subs_1.default);
+router.put("/confirm", subs_2.confirmationController);
+router.get("/subscribers", subs_3.getAllSubscribers);
+router.post("/forgot/password", forgotPassword_1.forgotPassword);
+router.put("/reset/password", forgotPassword_2.resetPassword);
+exports.default = router;

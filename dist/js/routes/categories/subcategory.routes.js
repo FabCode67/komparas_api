@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const subcategory_controller_1 = require("../../controllers/categories/subcategory.controller");
+const authorization_1 = require("../../middleware/auth/authorization");
+const router = (0, express_1.Router)();
+router.get("/subcategories/all", subcategory_controller_1.getAllSubCategories);
+router.post("/subcategories/add", authorization_1.authenticat, authorization_1.isAdminAuthenticat, subcategory_controller_1.addSubCategory);
+router.put("/subcategories/update/:id", authorization_1.authenticat, authorization_1.isAdminAuthenticat, subcategory_controller_1.updateSubCategory);
+router.delete("/subcategories/delete/:id", authorization_1.authenticat, authorization_1.isAdminAuthenticat, subcategory_controller_1.deleteSubCategory);
+router.get("/subcategories/:id", subcategory_controller_1.getSubCategoryById);
+router.get("/subcategories/name/:name", subcategory_controller_1.getSubCategoryByName);
+router.get("/subcategories/:subcategoryId/products", subcategory_controller_1.getSubcategoryWithProducts);
+router.get("/subcategories/:subcategoryId/category", subcategory_controller_1.getSubcategoryWithCategory);
+router.get("/subcategories/:subcategoryId/category/name", subcategory_controller_1.getSubcategoryWithCategoryName);
+exports.default = router;
