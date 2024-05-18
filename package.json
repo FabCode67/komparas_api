@@ -5,8 +5,10 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/js/index.js",
-    "test": "nyc --reporter=text --reporter=html --reporter=json-summary mocha --require ts-node/register --recursive --exit --timeout 120000 test/*.ts",
-    "dev": "concurrently \"tsc -w\" \"nodemon dist/js/index.js\""
+    "test": "jest --no-cache --detectOpenHandles",
+    "test-test": "jest --watchAll --no-cache --detectOpenHandles",
+    "test:ci": "jest --detectOpenHandles --coverage",
+    "dev": "ts-node-dev ./src/index.ts"
   },
   "repository": "https://github.com/FabCode67/komparas_api",
   "author": "Fabrice <mwanafunzifabrice@gmail.com>",
