@@ -4,11 +4,11 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/js/index.js",
+    "start": "node --max_old_space_size=2048 dist/js/index.js",
     "test": "jest --no-cache --detectOpenHandles",
     "test-test": "jest --watchAll --no-cache --detectOpenHandles",
     "test:ci": "jest --detectOpenHandles --coverage",
-    "dev": "ts-node-dev ./src/index.ts"
+    "dev": "ts-node-dev --max_old_space_size=2048 ./src/index.ts"
   },
   "repository": "https://github.com/FabCode67/komparas_api",
   "author": "Fabrice <mwanafunzifabrice@gmail.com>",
