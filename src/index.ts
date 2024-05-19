@@ -59,7 +59,7 @@ uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@kom
 mongoose
   .connect(uri)
   .then(() =>
-    app.listen(PORT, () => console.log(`server running on port ${PORT}`))
+    app.listen(3000, () => console.log(`server running on port ${PORT}`))
   )
   .catch((error) => {
     throw error;

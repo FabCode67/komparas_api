@@ -55,7 +55,7 @@ let uri;
 uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@komparas.jx1hf07.mongodb.net/?retryWrites=true&w=majority`;
 mongoose_1.default
     .connect(uri)
-    .then(() => app.listen(PORT, () => console.log(`server running on port ${PORT}`)))
+    .then(() => app.listen(3000, () => console.log(`server running on port ${PORT}`)))
     .catch((error) => {
     throw error;
 });
