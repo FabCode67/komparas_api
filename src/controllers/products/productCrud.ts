@@ -52,7 +52,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       query['product_specifications.value'] = { $in: ramValues };
     }
     if (storageValues.length > 0) {
-      query['product_specifications.key'] = 'Storage';
+      query['product_specifications.key'] = 'Ububiko bubika igihe kinini/Storage';
       query['product_specifications.value'] = { $in: storageValues };
     }
     if (cameraValues.length > 0) {
