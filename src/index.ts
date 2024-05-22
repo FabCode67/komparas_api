@@ -9,7 +9,7 @@ import { v2 as cloudinary } from "cloudinary";
 
 
 const app: Express = express();
-const PORT: string | number = process.env.PORT || 8080;
+// const PORT: string | number = process.env.PORT || 8080;
 const corsOpts = {
   origin: '*',
   
@@ -53,13 +53,15 @@ app.use(allRoutes.DayphoneRoutes);
 // app.use(allRoutes.newCatrouters);
 app.use('/api-docs',swaggerUI.serve,swaggerUI.setup(docs));
 
+
 dotenv.config()
+const port = process.env.PORT || 3000
 let uri: string;
 uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@komparas.jx1hf07.mongodb.net/?retryWrites=true&w=majority`;
 mongoose
   .connect(uri)
   .then(() =>
-    app.listen(3000, () => console.log(`server running on port ${PORT}`))
+    app.listen(port, () => console.log(`server running on port ${port}`))
   )
   .catch((error) => {
     throw error;

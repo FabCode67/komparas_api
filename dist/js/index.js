@@ -12,7 +12,7 @@ const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const docs_1 = __importDefault(require("./docs"));
 const cloudinary_1 = require("cloudinary");
 const app = (0, express_1.default)();
-const PORT = process.env.PORT || 8080;
+// const PORT: string | number = process.env.PORT || 8080;
 const corsOpts = {
     origin: '*',
     methods: [
@@ -51,11 +51,12 @@ app.use(index_routes_1.default.DayphoneRoutes);
 // app.use(allRoutes.newCatrouters);
 app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(docs_1.default));
 dotenv_1.default.config();
+const port = process.env.PORT || 3000;
 let uri;
 uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@komparas.jx1hf07.mongodb.net/?retryWrites=true&w=majority`;
 mongoose_1.default
     .connect(uri)
-    .then(() => app.listen(3000, () => console.log(`server running on port ${PORT}`)))
+    .then(() => app.listen(port, () => console.log(`server running on port ${port}`)))
     .catch((error) => {
     throw error;
 });

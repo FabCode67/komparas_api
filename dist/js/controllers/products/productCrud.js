@@ -56,7 +56,7 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             query['product_specifications.value'] = { $in: ramValues };
         }
         if (storageValues.length > 0) {
-            query['product_specifications.key'] = 'Storage';
+            query['product_specifications.key'] = 'Ububiko bubika igihe kinini/Storage';
             query['product_specifications.value'] = { $in: storageValues };
         }
         if (cameraValues.length > 0) {
