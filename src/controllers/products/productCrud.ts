@@ -11,7 +11,6 @@ import { Types } from 'mongoose';
 
 // import { Types } from 'mongoose';
 
-
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : 0;
@@ -22,6 +21,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     const storageValues = req.query.storage ? (req.query.storage as string).split(",") : [];
     const cameraValues = req.query.camera ? (req.query.camera as string).split(",") : [];
     const typesValues = req.query.types ? (req.query.types as string).split(",") : [];
+    const colorsValues = req.query.colors ? (req.query.colors as string).split(",") : [];
 
     let query: any = {
       'vendor_prices.price': { $gte: minPrice, $lte: maxPrice }
@@ -63,6 +63,14 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       query['product_specifications.key'] = 'Types';
       query['product_specifications.value'] = { $in: typesValues };
     }
+    if (colorsValues.length > 0) {
+      query['vendor_prices.colors'] = {
+        $elemMatch: {
+          $regex: colorsValues.map(color => `(^|,\\s*)${color}(\\s*,|$)`).join('|'),
+          $options: 'i'
+        }
+      };
+    }
 
     const products: IProducts[] = await Products.find(query).maxTimeMS(30000);
 
@@ -75,7 +83,6 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     });
   }
 }
-
 
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
