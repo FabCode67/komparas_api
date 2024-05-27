@@ -20,6 +20,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     const ramValues = req.query.ram ? (req.query.ram as string).split(",") : [];
     const storageValues = req.query.storage ? (req.query.storage as string).split(",") : [];
     const cameraValues = req.query.camera ? (req.query.camera as string).split(",") : [];
+    const screenValues = req.query.screen ? (req.query.screen as string).split(",") : [];
     const typesValues = req.query.types ? (req.query.types as string).split(",") : [];
     const colorsValues = req.query.colors ? (req.query.colors as string).split(",") : [];
 
@@ -59,6 +60,10 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       query['product_specifications.key'] = 'Camera';
       query['product_specifications.value'] = { $in: cameraValues };
     }
+    if (screenValues.length > 0) {
+      query['product_specifications.key'] = 'Ingano ya screen/ikirahuri';
+      query['product_specifications.value'] = { $in: screenValues };
+    }
     if (typesValues.length > 0) {
       query['product_specifications.key'] = 'Types';
       query['product_specifications.value'] = { $in: typesValues };
@@ -86,8 +91,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const productIds = (req.query.productIds as string)?.split(',') ?? []; console.log("[[[[[[[[[[[[[[[[[[", productIds);
-
+    const productIds = (req.query.productIds as string)?.split(',') ?? []; 
     const product = await Products.find({ _id: { $in: productIds } });
     if (!product) {
       res.status(404).json({
@@ -182,7 +186,6 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
   try {
     const productId = req.params.productId;
     const product: IProducts | null | any = await Products.findById(productId);
-
     if (!product) {
       res.status(404).json({
         status: false,
@@ -190,17 +193,12 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
       });
       return;
     }
-
     const productImages = await productImage.find({ product: product._id });
     const productCategory = await Category.findById(product.category);
-
     const vendorDetailsPromises = product?.vendors?.map(async (vendorId: any) => {
       const vendor = await Shop.findById(vendorId);
       return vendor;
     });
-
-    // add also the main product image into the product images array
-
     const productImagesWithMainImage = [
       {
         _id: product._id,
@@ -209,10 +207,7 @@ export const getSingleProductWithImages = async (req: Request, res: Response): P
       },
       ...productImages,
     ];
-
-
     const vendorDetails = await Promise.all(vendorDetailsPromises);
-
     res.status(200).json({
       status: true,
       product: {
