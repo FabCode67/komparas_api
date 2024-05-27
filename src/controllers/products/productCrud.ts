@@ -61,7 +61,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       query['product_specifications.value'] = { $in: cameraValues };
     }
     if (screenValues.length > 0) {
-      query['product_specifications.key'] = 'Ingano ya screen/ikirahuri';
+      query['product_specifications.key'] = 'Ikirahuri';
       query['product_specifications.value'] = { $in: screenValues };
     }
     if (typesValues.length > 0) {
@@ -76,9 +76,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
         }
       };
     }
-
     const products: IProducts[] = await Products.find(query).maxTimeMS(30000);
-
     res.status(200).json({ products });
   } catch (error) {
     console.error(error);
