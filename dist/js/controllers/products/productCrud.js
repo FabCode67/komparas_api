@@ -30,7 +30,9 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const ramValues = req.query.ram ? req.query.ram.split(",") : [];
         const storageValues = req.query.storage ? req.query.storage.split(",") : [];
         const cameraValues = req.query.camera ? req.query.camera.split(",") : [];
+        const screenValues = req.query.screen ? req.query.screen.split(",") : [];
         const typesValues = req.query.types ? req.query.types.split(",") : [];
+        const colorsValues = req.query.colors ? req.query.colors.split(",") : [];
         let query = {
             'vendor_prices.price': { $gte: minPrice, $lte: maxPrice }
         };
@@ -63,9 +65,21 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             query['product_specifications.key'] = 'Camera';
             query['product_specifications.value'] = { $in: cameraValues };
         }
+        if (screenValues.length > 0) {
+            query['product_specifications.key'] = 'Ikirahuri';
+            query['product_specifications.value'] = { $in: screenValues };
+        }
         if (typesValues.length > 0) {
             query['product_specifications.key'] = 'Types';
             query['product_specifications.value'] = { $in: typesValues };
+        }
+        if (colorsValues.length > 0) {
+            query['vendor_prices.colors'] = {
+                $elemMatch: {
+                    $regex: colorsValues.map(color => `(^|,\\s*)${color}(\\s*,|$)`).join('|'),
+                    $options: 'i'
+                }
+            };
         }
         const products = yield products_1.default.find(query).maxTimeMS(30000);
         res.status(200).json({ products });
@@ -83,7 +97,6 @@ const getProductById = (req, res) => __awaiter(void 0, void 0, void 0, function*
     var _a, _b;
     try {
         const productIds = (_b = (_a = req.query.productIds) === null || _a === void 0 ? void 0 : _a.split(',')) !== null && _b !== void 0 ? _b : [];
-        console.log("[[[[[[[[[[[[[[[[[[", productIds);
         const product = yield products_1.default.find({ _id: { $in: productIds } });
         if (!product) {
             res.status(404).json({
@@ -185,7 +198,6 @@ const getSingleProductWithImages = (req, res) => __awaiter(void 0, void 0, void 
             const vendor = yield shop_1.default.findById(vendorId);
             return vendor;
         }));
-        // add also the main product image into the product images array
         const productImagesWithMainImage = [
             {
                 _id: product._id,
