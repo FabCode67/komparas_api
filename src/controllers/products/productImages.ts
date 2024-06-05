@@ -66,9 +66,7 @@ export const getProductImages = async (req: Request, res: Response): Promise<voi
             });
             return;
         }
-
         const productImages = await ProductImages.find({ product: product_id });
-
         res.status(200).json(productImages);
     } catch (err) {
         console.error(err);
@@ -90,9 +88,7 @@ export const deleteProductImage = async (req: Request, res: Response): Promise<v
             });
             return;
         }
-
         const deletedProductImage = await ProductImages.findByIdAndDelete(product_image_id);
-
         res.status(200).json({
             message: 'Product image deleted successfully',
             productImage: deletedProductImage,
@@ -117,9 +113,8 @@ export const upDateProductImage = async (req: Request, res: Response): Promise<v
             });
             return;
         }
-
+        
         const updatedProductImage = await ProductImages.findByIdAndUpdate(product_image_id, req.body, { new: true });
-
         res.status(200).json({
             message: 'Product image updated successfully',
             productImage: updatedProductImage,

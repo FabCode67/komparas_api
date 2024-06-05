@@ -5,4 +5,5 @@ export interface IPromo1 extends Document {
     offer:string;
     price:number;
     image:string;
+    product:any;
 }
