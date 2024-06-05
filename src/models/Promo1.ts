@@ -9,9 +9,7 @@ const Promo1Schema = new Schema<IPromo1>({
     image: { type: String },
     product: { 
         type: Schema.Types.ObjectId, 
-        ref: 'Products', 
-        required: true 
-    } 
+        ref: 'Products',     } 
 }, { timestamps: true });
 
 const Promo1 = model<IPromo1>('Promo1', Promo1Schema);

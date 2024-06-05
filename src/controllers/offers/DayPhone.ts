@@ -1,14 +1,13 @@
 import { Response, Request } from "express";
 import { IDayPhone } from "../../types/DayPhone";
 import DayPhone from "../../models/DayPhone";
-import { v2 as cloudinaryV2, UploadApiResponse, UploadStream } from "cloudinary";
+import { v2 as cloudinaryV2, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
 
 export const addDayPhone = async (req: Request, res: Response): Promise<void> => {
     try {
         const image = req.file;
-
-        const { name, description, offer, price } = req.body;
+        const { name, description, offer, price, product } = req.body;
 
         if (!image) {
             res.status(400).json({
@@ -44,6 +43,7 @@ export const addDayPhone = async (req: Request, res: Response): Promise<void> =>
                         offer,
                         price,
                         image: cloudinaryResult.secure_url,
+                        product, // Reference to the existing product
                     });
 
                     const DayPhoneProductImageResult: IDayPhone = await DayPhoneProductImage.save();
@@ -70,12 +70,13 @@ export const addDayPhone = async (req: Request, res: Response): Promise<void> =>
 
 export const getDayProducts = async (req: Request, res: Response): Promise<void> => {
     try {
-        const dayProducts: IDayPhone[] = await DayPhone.find();
+        const dayProducts: IDayPhone[] = await DayPhone.find().populate('product');
         res.status(200).json({ dayProducts });
     } catch (error) {
         res.status(500).send(error);
     }
-}
+};
+
 export const updateDayProduct = async (req: Request, res: Response): Promise<void> => {
     try {
         const dayProducts: IDayPhone[] = await DayPhone.find();
@@ -91,12 +92,12 @@ export const updateDayProduct = async (req: Request, res: Response): Promise<voi
             return;
         }
 
-
         if (dayProduct) {
             dayProduct.name = req.body.name;
             dayProduct.description = req.body.description;
             dayProduct.offer = req.body.offer;
             dayProduct.price = req.body.price;
+            dayProduct.product = req.body.product; // Update the product reference
 
             const result: UploadStream = cloudinaryV2.uploader.upload_stream(
                 { folder: 'product-images' },
@@ -128,4 +129,4 @@ export const updateDayProduct = async (req: Request, res: Response): Promise<voi
     } catch (error) {
         res.status(500).send(error);
     }
-}
+};

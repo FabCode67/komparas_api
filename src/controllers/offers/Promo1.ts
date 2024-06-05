@@ -15,6 +15,7 @@ export const addPromo1 = async (req: Request, res: Response): Promise<void> => {
                 message: 'Please provide image file',
             });
             return;
+            
         }
 
         // Check if other items exist in the table

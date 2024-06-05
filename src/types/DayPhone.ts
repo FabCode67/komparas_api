@@ -6,4 +6,5 @@ export interface IDayPhone extends Document {
     offer:string;
     price:number;
     image:string;
+    product:any
 }

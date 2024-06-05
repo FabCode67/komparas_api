@@ -7,8 +7,7 @@ import streamifier from "streamifier";
 export const addPromo3 = async (req: Request, res: Response): Promise<void> => {
     try {
         const image = req.file;
-
-        const { name, description, offer, price } = req.body;
+        const { name, description, offer, price, product } = req.body;
 
         if (!image) {
             res.status(400).json({
@@ -44,6 +43,7 @@ export const addPromo3 = async (req: Request, res: Response): Promise<void> => {
                         offer,
                         price,
                         image: cloudinaryResult.secure_url,
+                        product, // Reference to the existing product
                     });
 
                     const Promo3ProductImageResult: IPromo3 = await Promo3ProductImage.save();
@@ -70,12 +70,13 @@ export const addPromo3 = async (req: Request, res: Response): Promise<void> => {
 
 export const getPromo3 = async (req: Request, res: Response): Promise<void> => {
     try {
-        const dayProducts: IPromo3[] = await Promo3.find();
+        const dayProducts: IPromo3[] = await Promo3.find().populate('product');
         res.status(200).json({ dayProducts });
     } catch (error) {
         res.status(500).send(error);
     }
-}
+};
+
 export const updatePromo3 = async (req: Request, res: Response): Promise<void> => {
     try {
         const dayProducts: IPromo3[] = await Promo3.find();
@@ -83,20 +84,20 @@ export const updatePromo3 = async (req: Request, res: Response): Promise<void> =
 
         const dimage = req.file;
 
-        if(!dimage) {
+        if (!dimage) {
             res.status(400).json({
                 status: false,
                 message: 'Please provide an image file',
             });
             return;
         }
-        
 
         if (dayProduct) {
             dayProduct.name = req.body.name;
             dayProduct.description = req.body.description;
             dayProduct.offer = req.body.offer;
             dayProduct.price = req.body.price;
+            dayProduct.product = req.body.product; // Update the product reference
 
             const result: UploadStream = cloudinaryV2.uploader.upload_stream(
                 { folder: 'product-images' },
@@ -128,4 +129,4 @@ export const updatePromo3 = async (req: Request, res: Response): Promise<void> =
     } catch (error) {
         res.status(500).send(error);
     }
-}
+};
