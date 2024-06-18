@@ -1,8 +1,10 @@
+
 import { Response, Request } from "express";
 import { IDayPhone } from "../../types/DayPhone";
 import DayPhone from "../../models/DayPhone";
 import { v2 as cloudinaryV2, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
+
 
 export const addDayPhone = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -15,6 +17,7 @@ export const addDayPhone = async (req: Request, res: Response): Promise<void> =>
                 message: 'Please provide image file',
             });
             return;
+            
         }
 
         // Check if other items exist in the table
@@ -37,7 +40,7 @@ export const addDayPhone = async (req: Request, res: Response): Promise<void> =>
                         message: 'An error occurred while uploading the image to Cloudinary',
                     });
                 } else {
-                    const DayPhoneProductImage: IDayPhone = new DayPhone({
+                    const Promo1ProductImage: IDayPhone = new DayPhone({
                         name,
                         description,
                         offer,
@@ -46,10 +49,10 @@ export const addDayPhone = async (req: Request, res: Response): Promise<void> =>
                         product, // Reference to the existing product
                     });
 
-                    const DayPhoneProductImageResult: IDayPhone = await DayPhoneProductImage.save();
+                    const Promo1ProductImageResult: IDayPhone = await Promo1ProductImage.save();
                     res.status(201).json({
                         message: 'Product image added successfully',
-                        productImage: DayPhoneProductImageResult,
+                        productImage: Promo1ProductImageResult,
                     });
                 }
             }

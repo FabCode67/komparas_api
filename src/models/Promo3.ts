@@ -7,6 +7,9 @@ const Promo3Schema = new Schema<IPromo3>({
     offer: { type: String },
     price: { type: Number },
     image: { type: String },
+    product: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'Products',     } 
 }, { timestamps: true });
 
 const Promo3 = model<IPromo3>('Promo3', Promo3Schema);
