@@ -8,6 +8,7 @@ const ShopSchema: Schema = new Schema({
     phone: { type: String },
     email: { type: String, unique: true },
     description: { type: String },
+    image: { type: String },
 }, { timestamps: true });
 
 export default mongoose.model<IShop>('Shop', ShopSchema);

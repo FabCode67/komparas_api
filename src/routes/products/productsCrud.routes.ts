@@ -16,9 +16,7 @@ import {
 } from "../../controllers/products/productCrud";
 import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
 import multer from "multer";
-
 const storage = multer.memoryStorage();
-
 const upload = multer({ storage });
 
 const router : Router = Router()

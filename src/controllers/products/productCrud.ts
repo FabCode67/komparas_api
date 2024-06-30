@@ -6,15 +6,12 @@ import productImage from "../../models/productImage";
 import { v2 as cloudinaryV2, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
 import Shop from "../../models/shop";
-import { IShop } from "../../types/shop";
 import { Types } from 'mongoose';
 
-// import { Types } from 'mongoose';
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
     const imageFile = req.file;
-
     if (!imageFile) {
       res.status(400).json({
         status: false,
@@ -57,7 +54,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             vendor_name: vp.vendor_name,
             price: vp.price,
             colors: vp.colors,
-            color: vp.color, // Add the color value here
+            color: vp.color, 
           }));
 
           const newProduct: IProducts = new Products({
