@@ -8,6 +8,118 @@ import streamifier from "streamifier";
 import Shop from "../../models/shop";
 import { Types } from 'mongoose';
 
+export const updateProduct = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
+    const imageFile = req.file;
+    const product_id = req.params.productId;
+    
+    const product = await Products.findById(product_id);
+    if (!product) {
+      res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+      return;
+    }
+
+    if (category_name) {
+      const category = await Category.findOne({ name: category_name });
+      if (!category) {
+        res.status(404).json({
+          status: false,
+          message: 'Category not found',
+        });
+        return;
+      }
+      product.category = category._id;
+    }
+
+    if (vendor_prices) {
+      const vendors = await Shop.find({ _id: { $in: vendor_prices.map((vp: any) => vp.vendor_id) } });
+      const newVendorPrices = vendor_prices.map((vp: any) => ({
+        vendor_id: vp.vendor_id,
+        vendor_name: vp.vendor_name,
+        price: vp.price,
+        colors: vp.colors,
+        color: vp.color, 
+      }));
+      product.vendors = vendors?.map(vendor => vendor._id);
+      product.vendor_prices = newVendorPrices;
+    }
+
+    if (specifications) {
+      product.product_specifications = specifications.map((spec: any) => ({
+        key: spec?.key?.toString(),
+        value: spec?.value?.toString(),
+      }));
+    }
+
+    if (our_review) {
+      product.our_review = our_review.map((rev: any) => ({
+        key: rev?.key?.toString(),
+        value: rev?.value?.toString(),
+      }));
+    }
+
+    if (availableStorages) {
+      product.availableStorages = availableStorages.map((st: any) => ({
+        value: st?.value?.toString(),
+      }));
+    }
+
+    if (product_name) {
+      product.product_name = product_name;
+    }
+
+    if (product_description) {
+      product.product_description = product_description;
+    }
+
+    if (our_price) {
+      product.our_price = our_price;
+    }
+
+    if (imageFile) {
+      const result: UploadStream = cloudinaryV2.uploader.upload_stream(
+        { folder: 'product-images' },
+        async (error, cloudinaryResult: any) => {
+          if (error) {
+            console.error(error);
+            res.status(500).json({
+              status: false,
+              message: 'An error occurred while uploading the image to Cloudinary',
+            });
+            return;
+          } else {
+            product.product_image = cloudinaryResult.secure_url;
+            await product.save();
+            res.status(200).json({
+              message: 'Product updated successfully',
+              product,
+            });
+          }
+        }
+      );
+      streamifier.createReadStream(imageFile.buffer).pipe(result);
+    } else {
+      await product.save();
+      res.status(200).json({
+        message: 'Product updated successfully',
+        product,
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: false,
+      error: err,
+      message: 'An error occurred while updating the product',
+    });
+  }
+};
+
+
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
@@ -92,103 +204,103 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const updateProduct = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
-    const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
-    const imageFile = req.file;
+// export const updateProduct = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const { productId } = req.params;
+//     const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
+//     const imageFile = req.file;
 
-    const existingProduct = await Products.findById(productId);
-    if (!existingProduct) {
-      res.status(404).json({
-        status: false,
-        message: 'Product not found',
-      });
-      return;
-    }
+//     const existingProduct = await Products.findById(productId);
+//     if (!existingProduct) {
+//       res.status(404).json({
+//         status: false,
+//         message: 'Product not found',
+//       });
+//       return;
+//     }
 
-    let cloudinaryResult:any;
-    if (imageFile) {
-      const result: UploadStream = cloudinaryV2.uploader.upload_stream(
-        { folder: 'product-images' },
-        async (error, uploadResult: any) => {
-          if (error) {
-            console.error(error);
-            res.status(500).json({
-              status: false,
-              message: 'An error occurred while uploading the image to Cloudinary',
-            });
-          } else {
-            cloudinaryResult = uploadResult;
-          }
-        });
+//     let cloudinaryResult:any;
+//     if (imageFile) {
+//       const result: UploadStream = cloudinaryV2.uploader.upload_stream(
+//         { folder: 'product-images' },
+//         async (error, uploadResult: any) => {
+//           if (error) {
+//             console.error(error);
+//             res.status(500).json({
+//               status: false,
+//               message: 'An error occurred while uploading the image to Cloudinary',
+//             });
+//           } else {
+//             cloudinaryResult = uploadResult;
+//           }
+//         });
 
-      if (!result) {
-        throw new Error("Cloudinary upload failed");
-      }
+//       if (!result) {
+//         throw new Error("Cloudinary upload failed");
+//       }
 
-      streamifier.createReadStream(imageFile.buffer).pipe(result);
+//       streamifier.createReadStream(imageFile.buffer).pipe(result);
 
-      if (!cloudinaryResult) {
-        return; // If image upload fails, return early
-      }
-    }
+//       if (!cloudinaryResult) {
+//         return; // If image upload fails, return early
+//       }
+//     }
 
-    const category = await Category.findOne({ name: category_name });
-    if (!category) {
-      res.status(404).json({
-        status: false,
-        message: 'Category not found',
-      });
-      return;
-    }
+//     const category = await Category.findOne({ name: category_name });
+//     if (!category) {
+//       res.status(404).json({
+//         status: false,
+//         message: 'Category not found',
+//       });
+//       return;
+//     }
 
-    const vendors = await Shop.find({ _id: { $in: vendor_prices?.map((vp: any) => vp.vendor_id) } });
-    const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
-      key: spec?.key?.toString(),
-      value: spec?.value?.toString(),
-    }));
-    const productReview: Array<{ key: string; value: string }> = our_review?.map((rev: any) => ({
-      key: rev?.key?.toString(),
-      value: rev?.value?.toString(),
-    }));
-    const productAvailableStorages: Array<{ value: string }> = availableStorages?.map((st: any) => ({
-      value: st?.value?.toString(),
-    }));
-    const newVendorPrices = vendor_prices?.map((vp: any) => ({
-      vendor_id: vp.vendor_id,
-      vendor_name: vp.vendor_name,
-      price: vp.price,
-      colors: vp.colors,
-      color: vp.color, // Add the color value here
-    }));
+//     const vendors = await Shop.find({ _id: { $in: vendor_prices?.map((vp: any) => vp.vendor_id) } });
+//     const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
+//       key: spec?.key?.toString(),
+//       value: spec?.value?.toString(),
+//     }));
+//     const productReview: Array<{ key: string; value: string }> = our_review?.map((rev: any) => ({
+//       key: rev?.key?.toString(),
+//       value: rev?.value?.toString(),
+//     }));
+//     const productAvailableStorages: Array<{ value: string }> = availableStorages?.map((st: any) => ({
+//       value: st?.value?.toString(),
+//     }));
+//     const newVendorPrices = vendor_prices?.map((vp: any) => ({
+//       vendor_id: vp.vendor_id,
+//       vendor_name: vp.vendor_name,
+//       price: vp.price,
+//       colors: vp.colors,
+//       color: vp.color, // Add the color value here
+//     }));
 
-    existingProduct.product_name = product_name || existingProduct.product_name;
-    existingProduct.product_description = product_description || existingProduct.product_description;
-    existingProduct.category = category._id || existingProduct.category;
-    existingProduct.product_image = cloudinaryResult?.secure_url || existingProduct.product_image;
-    existingProduct.vendors = vendors?.map(vendor => vendor._id) || existingProduct.vendors;
-    existingProduct.our_price = our_price || existingProduct.our_price;
-    existingProduct.product_specifications = productSpecifications || existingProduct.product_specifications;
-    existingProduct.vendor_prices = newVendorPrices || existingProduct.vendor_prices;
-    existingProduct.our_review = productReview || existingProduct.our_review;
-    existingProduct.availableStorages = productAvailableStorages || existingProduct.availableStorages;
+//     existingProduct.product_name = product_name || existingProduct.product_name;
+//     existingProduct.product_description = product_description || existingProduct.product_description;
+//     existingProduct.category = category._id || existingProduct.category;
+//     existingProduct.product_image = cloudinaryResult?.secure_url || existingProduct.product_image;
+//     existingProduct.vendors = vendors?.map(vendor => vendor._id) || existingProduct.vendors;
+//     existingProduct.our_price = our_price || existingProduct.our_price;
+//     existingProduct.product_specifications = productSpecifications || existingProduct.product_specifications;
+//     existingProduct.vendor_prices = newVendorPrices || existingProduct.vendor_prices;
+//     existingProduct.our_review = productReview || existingProduct.our_review;
+//     existingProduct.availableStorages = productAvailableStorages || existingProduct.availableStorages;
 
-    const updatedProductResult: IProducts = await existingProduct.save();
-    res.status(200).json({
-      message: 'Product updated successfully',
-      product: updatedProductResult,
-    });
+//     const updatedProductResult: IProducts = await existingProduct.save();
+//     res.status(200).json({
+//       message: 'Product updated successfully',
+//       product: updatedProductResult,
+//     });
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      status: false,
-      error: err,
-      message: 'An error occurred while updating the product',
-    });
-  }
-};
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({
+//       status: false,
+//       error: err,
+//       message: 'An error occurred while updating the product',
+//     });
+//   }
+// };
 
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
