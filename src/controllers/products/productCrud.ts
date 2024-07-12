@@ -228,15 +228,19 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       query['vendor_prices.vendor_id'] = { $in: vendorIds };
     }
     if (ramValues.length > 0) {
-      query['product_specifications.key'] = 'RAM';
-      query['product_specifications.value'] = { $in: ramValues };
+      query['product_specifications.key'] = {$regex: 'RAM', $options: 'i'};
+      query['product_specifications.value'] = { $in: ramValues.map(ram => ram.replace(/\s/g, ''))};
     }
     if (storageValues.length > 0) {
-      query['product_specifications.key'] = 'Ububiko bubika igihe kinini/Storage';
-      query['product_specifications.value'] = { $in: storageValues };
+      query['product_specifications.key'] = "Ingano y’ububiko/ ubushobozi bwo kubika";
+      query['product_specifications.value'] = {
+        $in: storageValues.map(storage => storage.replace(/\s/g, ''))
+      };
+      console.log(query['product_specifications.value']);
+      
     }
     if (cameraValues.length > 0) {
-      query['product_specifications.key'] = 'Camera';
+      query['product_specifications.key'] = {$regex: 'Foto', $options: 'i'}
       query['product_specifications.value'] = { $in: cameraValues };
     }
     if (screenValues.length > 0) {
