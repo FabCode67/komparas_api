@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const productCrud_1 = require("../../controllers/products/productCrud");
-const authorization_1 = require("../../middleware/auth/authorization");
 const multer_1 = __importDefault(require("multer"));
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
@@ -17,7 +16,7 @@ router.get("/products/images/:productId", productCrud_1.getSingleProductWithImag
 router.get("/products/prod", productCrud_1.getProductById);
 router.get("/products/:productId", productCrud_1.getSingleProductById);
 router.post("/products/add", upload.single('product_image'), productCrud_1.addProduct);
-router.put("/products/:productId", upload.single('product_image'), authorization_1.isAdminAuthenticat, productCrud_1.updateProduct);
+router.put("/products/:productId", upload.single('product_image'), productCrud_1.updateProduct);
 router.delete("/products/:productId", productCrud_1.deleteProduct);
 router.get('/products/:category_id', productCrud_1.getProductsByCategory);
 router.get('/products/category/:category_name', productCrud_1.getProductsByCategory);

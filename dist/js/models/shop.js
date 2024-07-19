@@ -31,5 +31,6 @@ const ShopSchema = new mongoose_1.Schema({
     phone: { type: String },
     email: { type: String, unique: true },
     description: { type: String },
+    image: { type: String },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model('Shop', ShopSchema);

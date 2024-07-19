@@ -19,7 +19,7 @@ const streamifier_1 = __importDefault(require("streamifier"));
 const addPromo1 = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const image = req.file;
-        const { name, description, offer, price } = req.body;
+        const { name, description, offer, price, product } = req.body;
         if (!image) {
             res.status(400).json({
                 status: false,
@@ -51,6 +51,7 @@ const addPromo1 = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     offer,
                     price,
                     image: cloudinaryResult.secure_url,
+                    product, // Reference to the existing product
                 });
                 const Promo1ProductImageResult = yield Promo1ProductImage.save();
                 res.status(201).json({
@@ -75,7 +76,7 @@ const addPromo1 = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.addPromo1 = addPromo1;
 const getPromo1 = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const dayProducts = yield Promo1_1.default.find();
+        const dayProducts = yield Promo1_1.default.find().populate('product');
         res.status(200).json({ dayProducts });
     }
     catch (error) {
@@ -100,6 +101,7 @@ const updatePromo1 = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             dayProduct.description = req.body.description;
             dayProduct.offer = req.body.offer;
             dayProduct.price = req.body.price;
+            dayProduct.product = req.body.product; // Update the product reference
             const result = cloudinary_1.v2.uploader.upload_stream({ folder: 'product-images' }, (error, cloudinaryResult) => __awaiter(void 0, void 0, void 0, function* () {
                 if (error) {
                     console.error(error);

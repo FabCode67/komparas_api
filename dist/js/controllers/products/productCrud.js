@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProductsByVendor = exports.removeProductSpecification = exports.getProductsByCategory = exports.updateProduct = exports.deleteProduct = exports.addProduct = exports.getSingleProductWithImages = exports.getProductsWithImages = exports.getAllProductsWithCategoryName = exports.getSingleProductById = exports.getProductById = exports.getProducts = void 0;
+exports.getProductsByVendor = exports.removeProductSpecification = exports.getProductsByCategory = exports.deleteProduct = exports.getSingleProductWithImages = exports.getProductsWithImages = exports.getAllProductsWithCategoryName = exports.getSingleProductById = exports.getProductById = exports.getProducts = exports.addProduct = exports.updateProduct = void 0;
 const products_1 = __importDefault(require("../../models/products"));
 const category_1 = __importDefault(require("../../models/category"));
 const productImage_1 = __importDefault(require("../../models/productImage"));
@@ -20,7 +20,293 @@ const cloudinary_1 = require("cloudinary");
 const streamifier_1 = __importDefault(require("streamifier"));
 const shop_1 = __importDefault(require("../../models/shop"));
 const mongoose_1 = require("mongoose");
-// import { Types } from 'mongoose';
+const updateProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
+        const imageFile = req.file;
+        const product_id = req.params.productId;
+        const product = yield products_1.default.findById(product_id);
+        if (!product) {
+            res.status(404).json({
+                status: false,
+                message: 'Product not found',
+            });
+            return;
+        }
+        if (category_name) {
+            const category = yield category_1.default.findOne({ name: category_name });
+            if (!category) {
+                res.status(404).json({
+                    status: false,
+                    message: 'Category not found',
+                });
+                return;
+            }
+            product.category = category._id;
+        }
+        if (vendor_prices) {
+            const vendors = yield shop_1.default.find({ _id: { $in: vendor_prices.map((vp) => vp.vendor_id) } });
+            const newVendorPrices = vendor_prices.map((vp) => ({
+                vendor_id: vp.vendor_id,
+                vendor_name: vp.vendor_name,
+                price: vp.price,
+                colors: vp.colors,
+                color: vp.color,
+            }));
+            product.vendors = vendors === null || vendors === void 0 ? void 0 : vendors.map(vendor => vendor._id);
+            product.vendor_prices = newVendorPrices;
+        }
+        if (specifications) {
+            product.product_specifications = specifications.map((spec) => {
+                var _a, _b;
+                return ({
+                    key: (_a = spec === null || spec === void 0 ? void 0 : spec.key) === null || _a === void 0 ? void 0 : _a.toString(),
+                    value: (_b = spec === null || spec === void 0 ? void 0 : spec.value) === null || _b === void 0 ? void 0 : _b.toString(),
+                });
+            });
+        }
+        if (our_review) {
+            product.our_review = our_review.map((rev) => {
+                var _a, _b;
+                return ({
+                    key: (_a = rev === null || rev === void 0 ? void 0 : rev.key) === null || _a === void 0 ? void 0 : _a.toString(),
+                    value: (_b = rev === null || rev === void 0 ? void 0 : rev.value) === null || _b === void 0 ? void 0 : _b.toString(),
+                });
+            });
+        }
+        if (availableStorages) {
+            product.availableStorages = availableStorages.map((st) => {
+                var _a;
+                return ({
+                    value: (_a = st === null || st === void 0 ? void 0 : st.value) === null || _a === void 0 ? void 0 : _a.toString(),
+                });
+            });
+        }
+        if (product_name) {
+            product.product_name = product_name;
+        }
+        if (product_description) {
+            product.product_description = product_description;
+        }
+        if (our_price) {
+            product.our_price = our_price;
+        }
+        if (imageFile) {
+            const result = cloudinary_1.v2.uploader.upload_stream({ folder: 'product-images' }, (error, cloudinaryResult) => __awaiter(void 0, void 0, void 0, function* () {
+                if (error) {
+                    console.error(error);
+                    res.status(500).json({
+                        status: false,
+                        message: 'An error occurred while uploading the image to Cloudinary',
+                    });
+                    return;
+                }
+                else {
+                    product.product_image = cloudinaryResult.secure_url;
+                    yield product.save();
+                    res.status(200).json({
+                        message: 'Product updated successfully',
+                        product,
+                    });
+                }
+            }));
+            streamifier_1.default.createReadStream(imageFile.buffer).pipe(result);
+        }
+        else {
+            yield product.save();
+            res.status(200).json({
+                message: 'Product updated successfully',
+                product,
+            });
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: false,
+            error: err,
+            message: 'An error occurred while updating the product',
+        });
+    }
+});
+exports.updateProduct = updateProduct;
+const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
+        const imageFile = req.file;
+        if (!imageFile) {
+            res.status(400).json({
+                status: false,
+                message: 'Please upload an image file',
+            });
+            return;
+        }
+        const result = cloudinary_1.v2.uploader.upload_stream({ folder: 'product-images' }, (error, cloudinaryResult) => __awaiter(void 0, void 0, void 0, function* () {
+            if (error) {
+                console.error(error);
+                res.status(500).json({
+                    status: false,
+                    message: 'An error occurred while uploading the image to Cloudinary',
+                });
+            }
+            else {
+                const category = yield category_1.default.findOne({ name: category_name });
+                if (!category) {
+                    res.status(404).json({
+                        status: false,
+                        message: 'Category not found',
+                    });
+                    return;
+                }
+                const vendors = yield shop_1.default.find({ _id: { $in: vendor_prices.map((vp) => vp.vendor_id) } });
+                const productSpecifications = specifications === null || specifications === void 0 ? void 0 : specifications.map((spec) => {
+                    var _a, _b;
+                    return ({
+                        key: (_a = spec === null || spec === void 0 ? void 0 : spec.key) === null || _a === void 0 ? void 0 : _a.toString(),
+                        value: (_b = spec === null || spec === void 0 ? void 0 : spec.value) === null || _b === void 0 ? void 0 : _b.toString(),
+                    });
+                });
+                const productReview = our_review === null || our_review === void 0 ? void 0 : our_review.map((rev) => {
+                    var _a, _b;
+                    return ({
+                        key: (_a = rev === null || rev === void 0 ? void 0 : rev.key) === null || _a === void 0 ? void 0 : _a.toString(),
+                        value: (_b = rev === null || rev === void 0 ? void 0 : rev.value) === null || _b === void 0 ? void 0 : _b.toString(),
+                    });
+                });
+                const productAvailableStorages = availableStorages === null || availableStorages === void 0 ? void 0 : availableStorages.map((st) => {
+                    var _a;
+                    return ({
+                        value: (_a = st === null || st === void 0 ? void 0 : st.value) === null || _a === void 0 ? void 0 : _a.toString(),
+                    });
+                });
+                const newVendorPrices = vendor_prices.map((vp) => ({
+                    vendor_id: vp.vendor_id,
+                    vendor_name: vp.vendor_name,
+                    price: vp.price,
+                    colors: vp.colors,
+                    color: vp.color,
+                }));
+                const newProduct = new products_1.default({
+                    product_name: product_name,
+                    product_description: product_description,
+                    category: category._id,
+                    product_image: cloudinaryResult.secure_url,
+                    vendors: vendors === null || vendors === void 0 ? void 0 : vendors.map(vendor => vendor._id),
+                    our_price: our_price,
+                    product_specifications: productSpecifications,
+                    vendor_prices: newVendorPrices,
+                    our_review: productReview,
+                    availableStorages: productAvailableStorages,
+                });
+                const newProductResult = yield newProduct.save();
+                res.status(201).json({
+                    message: 'Product added successfully',
+                    product: newProductResult,
+                });
+            }
+        }));
+        if (!result) {
+            throw new Error("Cloudinary upload failed");
+        }
+        streamifier_1.default.createReadStream(imageFile.buffer).pipe(result);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: false,
+            error: err,
+            message: 'An error occurred while adding the product',
+        });
+    }
+});
+exports.addProduct = addProduct;
+// export const updateProduct = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const { productId } = req.params;
+//     const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
+//     const imageFile = req.file;
+//     const existingProduct = await Products.findById(productId);
+//     if (!existingProduct) {
+//       res.status(404).json({
+//         status: false,
+//         message: 'Product not found',
+//       });
+//       return;
+//     }
+//     let cloudinaryResult:any;
+//     if (imageFile) {
+//       const result: UploadStream = cloudinaryV2.uploader.upload_stream(
+//         { folder: 'product-images' },
+//         async (error, uploadResult: any) => {
+//           if (error) {
+//             console.error(error);
+//             res.status(500).json({
+//               status: false,
+//               message: 'An error occurred while uploading the image to Cloudinary',
+//             });
+//           } else {
+//             cloudinaryResult = uploadResult;
+//           }
+//         });
+//       if (!result) {
+//         throw new Error("Cloudinary upload failed");
+//       }
+//       streamifier.createReadStream(imageFile.buffer).pipe(result);
+//       if (!cloudinaryResult) {
+//         return; // If image upload fails, return early
+//       }
+//     }
+//     const category = await Category.findOne({ name: category_name });
+//     if (!category) {
+//       res.status(404).json({
+//         status: false,
+//         message: 'Category not found',
+//       });
+//       return;
+//     }
+//     const vendors = await Shop.find({ _id: { $in: vendor_prices?.map((vp: any) => vp.vendor_id) } });
+//     const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
+//       key: spec?.key?.toString(),
+//       value: spec?.value?.toString(),
+//     }));
+//     const productReview: Array<{ key: string; value: string }> = our_review?.map((rev: any) => ({
+//       key: rev?.key?.toString(),
+//       value: rev?.value?.toString(),
+//     }));
+//     const productAvailableStorages: Array<{ value: string }> = availableStorages?.map((st: any) => ({
+//       value: st?.value?.toString(),
+//     }));
+//     const newVendorPrices = vendor_prices?.map((vp: any) => ({
+//       vendor_id: vp.vendor_id,
+//       vendor_name: vp.vendor_name,
+//       price: vp.price,
+//       colors: vp.colors,
+//       color: vp.color, // Add the color value here
+//     }));
+//     existingProduct.product_name = product_name || existingProduct.product_name;
+//     existingProduct.product_description = product_description || existingProduct.product_description;
+//     existingProduct.category = category._id || existingProduct.category;
+//     existingProduct.product_image = cloudinaryResult?.secure_url || existingProduct.product_image;
+//     existingProduct.vendors = vendors?.map(vendor => vendor._id) || existingProduct.vendors;
+//     existingProduct.our_price = our_price || existingProduct.our_price;
+//     existingProduct.product_specifications = productSpecifications || existingProduct.product_specifications;
+//     existingProduct.vendor_prices = newVendorPrices || existingProduct.vendor_prices;
+//     existingProduct.our_review = productReview || existingProduct.our_review;
+//     existingProduct.availableStorages = productAvailableStorages || existingProduct.availableStorages;
+//     const updatedProductResult: IProducts = await existingProduct.save();
+//     res.status(200).json({
+//       message: 'Product updated successfully',
+//       product: updatedProductResult,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({
+//       status: false,
+//       error: err,
+//       message: 'An error occurred while updating the product',
+//     });
+//   }
+// };
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const minPrice = req.query.minPrice ? parseInt(req.query.minPrice) : 0;
@@ -54,15 +340,18 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             query['vendor_prices.vendor_id'] = { $in: vendorIds };
         }
         if (ramValues.length > 0) {
-            query['product_specifications.key'] = 'RAM';
-            query['product_specifications.value'] = { $in: ramValues };
+            query['product_specifications.key'] = { $regex: 'RAM', $options: 'i' };
+            query['product_specifications.value'] = { $in: ramValues.map(ram => ram.replace(/\s/g, '')) };
         }
         if (storageValues.length > 0) {
-            query['product_specifications.key'] = 'Ububiko bubika igihe kinini/Storage';
-            query['product_specifications.value'] = { $in: storageValues };
+            query['product_specifications.key'] = "Ingano y’ububiko/ ubushobozi bwo kubika";
+            query['product_specifications.value'] = {
+                $in: storageValues.map(storage => storage.replace(/\s/g, ''))
+            };
+            console.log(query['product_specifications.value']);
         }
         if (cameraValues.length > 0) {
-            query['product_specifications.key'] = 'Camera';
+            query['product_specifications.key'] = { $regex: 'Foto', $options: 'i' };
             query['product_specifications.value'] = { $in: cameraValues };
         }
         if (screenValues.length > 0) {
@@ -221,96 +510,6 @@ const getSingleProductWithImages = (req, res) => __awaiter(void 0, void 0, void 
     }
 });
 exports.getSingleProductWithImages = getSingleProductWithImages;
-const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
-        const imageFile = req.file;
-        if (!imageFile) {
-            res.status(400).json({
-                status: false,
-                message: 'Please upload an image file',
-            });
-            return;
-        }
-        const result = cloudinary_1.v2.uploader.upload_stream({ folder: 'product-images' }, (error, cloudinaryResult) => __awaiter(void 0, void 0, void 0, function* () {
-            if (error) {
-                console.error(error);
-                res.status(500).json({
-                    status: false,
-                    message: 'An error occurred while uploading the image to Cloudinary',
-                });
-            }
-            else {
-                const category = yield category_1.default.findOne({ name: category_name });
-                if (!category) {
-                    res.status(404).json({
-                        status: false,
-                        message: 'Category not found',
-                    });
-                    return;
-                }
-                const vendors = yield shop_1.default.find({ _id: { $in: vendor_prices.map((vp) => vp.vendor_id) } });
-                const productSpecifications = specifications === null || specifications === void 0 ? void 0 : specifications.map((spec) => {
-                    var _a, _b;
-                    return ({
-                        key: (_a = spec === null || spec === void 0 ? void 0 : spec.key) === null || _a === void 0 ? void 0 : _a.toString(),
-                        value: (_b = spec === null || spec === void 0 ? void 0 : spec.value) === null || _b === void 0 ? void 0 : _b.toString(),
-                    });
-                });
-                const productReview = our_review === null || our_review === void 0 ? void 0 : our_review.map((rev) => {
-                    var _a, _b;
-                    return ({
-                        key: (_a = rev === null || rev === void 0 ? void 0 : rev.key) === null || _a === void 0 ? void 0 : _a.toString(),
-                        value: (_b = rev === null || rev === void 0 ? void 0 : rev.value) === null || _b === void 0 ? void 0 : _b.toString(),
-                    });
-                });
-                const productAvailableStorages = availableStorages === null || availableStorages === void 0 ? void 0 : availableStorages.map((st) => {
-                    var _a;
-                    return ({
-                        value: (_a = st === null || st === void 0 ? void 0 : st.value) === null || _a === void 0 ? void 0 : _a.toString(),
-                    });
-                });
-                const newVendorPrices = vendor_prices.map((vp) => ({
-                    vendor_id: vp.vendor_id,
-                    vendor_name: vp.vendor_name,
-                    price: vp.price,
-                    colors: vp.colors,
-                    color: vp.color, // Add the color value here
-                }));
-                const newProduct = new products_1.default({
-                    product_name: product_name,
-                    product_description: product_description,
-                    category: category._id,
-                    product_image: cloudinaryResult.secure_url,
-                    vendors: vendors === null || vendors === void 0 ? void 0 : vendors.map(vendor => vendor._id),
-                    our_price: our_price,
-                    product_specifications: productSpecifications,
-                    vendor_prices: newVendorPrices,
-                    our_review: productReview,
-                    availableStorages: productAvailableStorages,
-                });
-                const newProductResult = yield newProduct.save();
-                res.status(201).json({
-                    message: 'Product added successfully',
-                    product: newProductResult,
-                });
-            }
-        }));
-        if (!result) {
-            throw new Error("Cloudinary upload failed");
-        }
-        streamifier_1.default.createReadStream(imageFile.buffer).pipe(result);
-    }
-    catch (err) {
-        console.error(err);
-        res.status(500).json({
-            status: false,
-            error: err,
-            message: 'An error occurred while adding the product',
-        });
-    }
-});
-exports.addProduct = addProduct;
 const deleteProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const productId = req.params.productId;
@@ -337,80 +536,80 @@ const deleteProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.deleteProduct = deleteProduct;
-const updateProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const productId = req.params.productId;
-        const { product_name, product_description, category_name, vendor_prices, specifications, our_review } = req.body;
-        const imageFile = req.file;
-        if (!imageFile) {
-            res.status(400).json({
-                status: false,
-                message: 'Please upload an image file',
-            });
-            return;
-        }
-        const result = cloudinary_1.v2.uploader.upload_stream({ folder: 'product-images' }, (error, cloudinaryResult) => __awaiter(void 0, void 0, void 0, function* () {
-            if (error) {
-                console.error(error);
-                res.status(500).json({
-                    status: false,
-                    message: 'An error occurred while uploading the image to Cloudinary',
-                });
-            }
-            else {
-                const category = yield category_1.default.findOne({ name: category_name });
-                if (!category) {
-                    res.status(404).json({
-                        status: false,
-                        message: 'Category not found',
-                    });
-                    return;
-                }
-                let existingVendors = [];
-                const existingProduct = yield products_1.default.findById(productId);
-                if (existingProduct) {
-                    existingVendors = existingProduct.vendors;
-                }
-                let newVendors = [];
-                if (vendor_prices) {
-                    const vendorIds = vendor_prices.map((vp) => vp.vendor_id);
-                    newVendors = yield shop_1.default.find({ _id: { $in: vendorIds, $nin: existingVendors } });
-                }
-                const mergedVendors = [...existingVendors, ...newVendors];
-                const updatedProduct = {
-                    product_name: product_name,
-                    product_description: product_description,
-                    category: category._id,
-                    product_image: cloudinaryResult.secure_url,
-                    vendors: mergedVendors.map((vendor) => (vendor instanceof mongoose_1.Types.ObjectId ? vendor : vendor._id)),
-                    product_specifications: specifications,
-                    vendor_prices: vendor_prices,
-                    our_review: our_review,
-                };
-                const updatedProductResult = yield products_1.default.findByIdAndUpdate(productId, updatedProduct, {
-                    new: true,
-                });
-                res.status(200).json({
-                    message: 'Product updated successfully',
-                    product: updatedProductResult,
-                });
-            }
-        }));
-        if (!result) {
-            throw new Error('Cloudinary upload failed');
-        }
-        streamifier_1.default.createReadStream(imageFile.buffer).pipe(result);
-    }
-    catch (err) {
-        console.error(err);
-        res.status(500).json({
-            status: false,
-            error: err,
-            message: 'An error occurred while updating the product',
-        });
-    }
-});
-exports.updateProduct = updateProduct;
+// export const updateProduct = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const productId = req.params.productId;
+//     const { product_name, product_description, category_name, vendor_prices, specifications, our_review } = req.body;
+//     const imageFile = req.file;
+//     if (!imageFile) {
+//       res.status(400).json({
+//         status: false,
+//         message: 'Please upload an image file',
+//       });
+//       return;
+//     }
+//     const result: UploadStream = cloudinaryV2.uploader.upload_stream(
+//       { folder: 'product-images' },
+//       async (error, cloudinaryResult: any) => {
+//         if (error) {
+//           console.error(error);
+//           res.status(500).json({
+//             status: false,
+//             message: 'An error occurred while uploading the image to Cloudinary',
+//           });
+//         } else {
+//           const category = await Category.findOne({ name: category_name });
+//           if (!category) {
+//             res.status(404).json({
+//               status: false,
+//               message: 'Category not found',
+//             });
+//             return;
+//           }
+//           let existingVendors: Types.ObjectId[] | IShop[] = [];
+//           const existingProduct = await Products.findById(productId);
+//           if (existingProduct) {
+//             existingVendors = existingProduct.vendors;
+//           }
+//           let newVendors: IShop[] = [];
+//           if (vendor_prices) {
+//             const vendorIds = vendor_prices.map((vp: any) => vp.vendor_id);
+//             newVendors = await Shop.find({ _id: { $in: vendorIds, $nin: existingVendors } });
+//           }
+//           const mergedVendors: any[] | IShop[] = [...existingVendors, ...newVendors];
+//           const updatedProduct: any = {
+//             product_name: product_name,
+//             product_description: product_description,
+//             category: category._id,
+//             product_image: cloudinaryResult.secure_url,
+//             vendors: mergedVendors.map((vendor) => (vendor instanceof Types.ObjectId ? vendor : vendor._id)),
+//             product_specifications: specifications,
+//             vendor_prices: vendor_prices,
+//             our_review: our_review,
+//           };
+//           const updatedProductResult = await Products.findByIdAndUpdate(productId, updatedProduct, {
+//             new: true,
+//           });
+//           res.status(200).json({
+//             message: 'Product updated successfully',
+//             product: updatedProductResult,
+//           });
+//         }
+//       }
+//     );
+//     if (!result) {
+//       throw new Error('Cloudinary upload failed');
+//     }
+//     streamifier.createReadStream(imageFile.buffer).pipe(result);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({
+//       status: false,
+//       error: err,
+//       message: 'An error occurred while updating the product',
+//     });
+//   }
+// };
 // export const getProductById = async (req: Request, res: Response): Promise<void> => {
 //   try {
 //     const productId = req.params.productId;

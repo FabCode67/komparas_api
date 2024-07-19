@@ -12,8 +12,67 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateCategory = exports.deleteCategory = exports.addCategory = exports.getCategoryByNameOrID = exports.getParentCategories = exports.getAllCategories = void 0;
+exports.updateCategory = exports.deleteCategory = exports.getCategoryByNameOrID = exports.getParentCategories = exports.getAllCategories = exports.addCategory = void 0;
 const category_1 = __importDefault(require("../../models/category"));
+const cloudinary_1 = require("cloudinary");
+const streamifier_1 = __importDefault(require("streamifier"));
+const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { name, parent_id } = req.body;
+        const image = req.file;
+        if (!image) {
+            res.status(400).json({
+                status: false,
+                message: 'Please upload an image file',
+            });
+            return;
+        }
+        const existingCategory = yield category_1.default.findOne({ name });
+        if (existingCategory) {
+            res.status(400).json({ message: 'Category with the same name already exists' });
+            return;
+        }
+        const result = cloudinary_1.v2.uploader.upload_stream({ folder: 'image' }, (error, cloudinaryResult) => __awaiter(void 0, void 0, void 0, function* () {
+            if (error) {
+                console.error(error);
+                res.status(500).json({
+                    status: false,
+                    message: 'An error occurred while uploading the image to Cloudinary',
+                });
+            }
+            else {
+                let category;
+                if (parent_id) {
+                    const parentCategory = yield category_1.default.findById(parent_id);
+                    if (!parentCategory) {
+                        res.status(400).json({ message: 'Parent category does not exist' });
+                        return;
+                    }
+                    category = new category_1.default({ name, parent_id, image: cloudinaryResult.secure_url });
+                    if (!parentCategory.children) {
+                        parentCategory.children = [];
+                    }
+                    parentCategory.children.push(category._id);
+                    yield parentCategory.save();
+                }
+                else {
+                    category = new category_1.default({ name, image: cloudinaryResult.secure_url });
+                }
+                yield category.save();
+                res.status(201).json({ message: 'Category added successfully', category });
+            }
+        }));
+        if (!result) {
+            throw new Error("Cloudinary upload failed");
+        }
+        streamifier_1.default.createReadStream(image.buffer).pipe(result);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+exports.addCategory = addCategory;
 const getAllCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const categories = yield category_1.default.find().populate('children');
@@ -57,40 +116,6 @@ const getCategoryByNameOrID = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.getCategoryByNameOrID = getCategoryByNameOrID;
-const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { name, parent_id } = req.body;
-        const existingCategory = yield category_1.default.findOne({ name });
-        if (existingCategory) {
-            res.status(400).json({ message: 'Category with the same name already exists' });
-            return;
-        }
-        let category;
-        if (parent_id) {
-            const parentCategory = yield category_1.default.findById(parent_id);
-            if (!parentCategory) {
-                res.status(400).json({ message: 'Parent category does not exist' });
-                return;
-            }
-            category = new category_1.default({ name, parent_id });
-            if (!parentCategory.children) {
-                parentCategory.children = [];
-            }
-            parentCategory.children.push(category._id);
-            yield parentCategory.save();
-        }
-        else {
-            category = new category_1.default({ name });
-        }
-        yield category.save();
-        res.status(201).json({ message: 'Category added successfully', category });
-    }
-    catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-exports.addCategory = addCategory;
 const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
@@ -125,10 +150,11 @@ const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
 });
 exports.deleteCategory = deleteCategory;
 const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c, _d;
+    var _c;
     try {
         const { category_id } = req.params;
         const { name, parent_id } = req.body;
+        const image = req.file;
         if (!category_id) {
             res.status(400).json({ message: 'Invalid category ID' });
             return;
@@ -151,14 +177,14 @@ const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 res.status(400).json({ message: 'Parent category does not exist' });
                 return;
             }
-            if ((categoryToUpdate === null || categoryToUpdate === void 0 ? void 0 : categoryToUpdate.parent_id) !== parent_id) {
-                const oldParentCategory = yield (category_1.default === null || category_1.default === void 0 ? void 0 : category_1.default.findById(categoryToUpdate === null || categoryToUpdate === void 0 ? void 0 : categoryToUpdate.parent_id));
+            if (categoryToUpdate.parent_id !== parent_id) {
+                const oldParentCategory = yield category_1.default.findById(categoryToUpdate.parent_id);
                 if (oldParentCategory) {
-                    oldParentCategory.children = (_c = oldParentCategory === null || oldParentCategory === void 0 ? void 0 : oldParentCategory.children) === null || _c === void 0 ? void 0 : _c.filter(childId => (childId === null || childId === void 0 ? void 0 : childId.toString()) !== category_id);
-                    yield (oldParentCategory === null || oldParentCategory === void 0 ? void 0 : oldParentCategory.save());
+                    oldParentCategory.children = oldParentCategory.children.filter((childId) => childId.toString() !== category_id);
+                    yield oldParentCategory.save();
                 }
-                parentCategory.children = (_d = parentCategory.children) !== null && _d !== void 0 ? _d : [];
-                parentCategory === null || parentCategory === void 0 ? void 0 : parentCategory.children.push(categoryToUpdate._id);
+                parentCategory.children = (_c = parentCategory.children) !== null && _c !== void 0 ? _c : [];
+                parentCategory.children.push(categoryToUpdate._id);
                 yield parentCategory.save();
                 categoryToUpdate.parent_id = parent_id;
             }
@@ -166,8 +192,31 @@ const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
         if (name) {
             categoryToUpdate.name = name;
         }
-        yield categoryToUpdate.save();
-        res.status(200).json({ message: 'Category updated successfully', category: categoryToUpdate });
+        if (image) {
+            const result = cloudinary_1.v2.uploader.upload_stream({ folder: 'image' }, (error, cloudinaryResult) => __awaiter(void 0, void 0, void 0, function* () {
+                if (error) {
+                    console.error(error);
+                    res.status(500).json({
+                        status: false,
+                        message: 'An error occurred while uploading the image to Cloudinary',
+                    });
+                    return;
+                }
+                else {
+                    categoryToUpdate.image = cloudinaryResult.secure_url;
+                    yield categoryToUpdate.save();
+                    res.status(200).json({ message: 'Category updated successfully', category: categoryToUpdate });
+                }
+            }));
+            if (!result) {
+                throw new Error('Cloudinary upload failed');
+            }
+            streamifier_1.default.createReadStream(image.buffer).pipe(result);
+        }
+        else {
+            yield categoryToUpdate.save();
+            res.status(200).json({ message: 'Category updated successfully', category: categoryToUpdate });
+        }
     }
     catch (error) {
         console.error(error);

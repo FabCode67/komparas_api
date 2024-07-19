@@ -7,6 +7,10 @@ const DayPhoneSchema = new mongoose_1.Schema({
     offer: { type: String },
     price: { type: Number },
     image: { type: String },
+    product: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: 'Products',
+    }
 }, { timestamps: true });
 const DayPhone = (0, mongoose_1.model)('DayPhone', DayPhoneSchema);
 exports.default = DayPhone;
