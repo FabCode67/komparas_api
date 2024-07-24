@@ -17,6 +17,4 @@ const productImageSchema: Schema = new Schema(
     }
 );
 
-
-
 export default model<IProductImage>('ProductImages', productImageSchema);

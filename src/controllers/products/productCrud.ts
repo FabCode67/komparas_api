@@ -8,6 +8,329 @@ import streamifier from "streamifier";
 import Shop from "../../models/shop";
 import { Types } from 'mongoose';
 
+export const addShopToProduct = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { vendor_id, price, colors } = req.body;
+
+    // Check if productId is valid
+    if (!Types.ObjectId.isValid(productId)) {
+      res.status(400).json({
+        status: false,
+        message: 'Invalid product ID',
+      });
+      return;
+    }
+
+    // Check if vendor_id is valid
+    if (!Types.ObjectId.isValid(vendor_id)) {
+      res.status(400).json({
+        status: false,
+        message: 'Invalid vendor ID',
+      });
+      return;
+    }
+
+    // Find the product by ID
+    const product = await Products.findById(productId);
+    if (!product) {
+      res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+      return;
+    }
+
+    // Find the vendor (shop) by ID
+    const vendor = await Shop.findById(vendor_id);
+    if (!vendor) {
+      res.status(404).json({
+        status: false,
+        message: 'Vendor not found',
+      });
+      return;
+    }
+
+    // Check if vendor is already associated with the product
+    const existingVendorIndex = product.vendor_prices.findIndex(vp => vp.vendor_id.toString() === vendor_id);
+
+    if (existingVendorIndex !== -1) {
+      // Update the existing vendor's price and colors if necessary
+      product.vendor_prices[existingVendorIndex].price = price;
+      product.vendor_prices[existingVendorIndex].colors = colors;
+    } else {
+      // Add new vendor to the product's vendor_prices
+      const newVendorPrice = {
+        vendor_id: vendor._id,
+        vendor_name: vendor.name,
+        price: price,
+        colors: colors,
+      };
+
+      product.vendor_prices.push(newVendorPrice);
+    }
+
+    // Add vendor to the vendors list if not already present
+    if (!product.vendors.includes(vendor._id)) {
+      product.vendors.push(vendor._id);
+    }
+
+    // Save the updated product
+    await product.save();
+
+    res.status(200).json({
+      status: true,
+      message: 'Vendor added to product successfully',
+      product,
+    });
+  } catch (error:any) {
+    console.error('Error adding vendor to product:', error);
+    res.status(500).json({
+      status: false,
+      message: 'An error occurred while adding vendor to product',
+      error: error.message, // Include error message for better debugging
+    });
+  }
+};
+
+export const updateShopInProduct = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { productId, vendorId } = req.params; // Get both IDs from the URL params
+    const { price, colors } = req.body;
+
+    // Validate productId
+    if (!Types.ObjectId.isValid(productId)) {
+      res.status(400).json({
+        status: false,
+        message: 'Invalid product ID',
+      });
+      return;
+    }
+
+    // Validate vendorId
+    if (!Types.ObjectId.isValid(vendorId)) {
+      res.status(400).json({
+        status: false,
+        message: 'Invalid vendor ID',
+      });
+      return;
+    }
+
+    // Find the product by ID
+    const product = await Products.findById(productId);
+    if (!product) {
+      res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+      return;
+    }
+
+    // Check if the vendor exists within the product's vendor_prices array
+    const vendorIndex = product.vendor_prices.findIndex(vp => vp.vendor_id.toString() === vendorId);
+
+    if (vendorIndex === -1) {
+      res.status(404).json({
+        status: false,
+        message: 'Vendor not associated with this product',
+      });
+      return;
+    }
+
+    // Update the vendor's price and colors
+    if (price !== undefined) {
+      product.vendor_prices[vendorIndex].price = price;
+    }
+    if (colors !== undefined) {
+      product.vendor_prices[vendorIndex].colors = colors;
+    }
+
+    // Save the updated product
+    await product.save();
+
+    res.status(200).json({
+      status: true,
+      message: 'Vendor details updated successfully',
+      product,
+    });
+  } catch (error:any) {
+    console.error('Error updating vendor details in product:', error);
+    res.status(500).json({
+      status: false,
+      message: 'An error occurred while updating vendor details',
+      error: error.message,
+    });
+  }
+};
+
+export const removeShopFromProduct = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { productId, vendorId } = req.params; // Get both IDs from the URL params
+
+    // Validate productId
+    if (!Types.ObjectId.isValid(productId)) {
+      res.status(400).json({
+        status: false,
+        message: 'Invalid product ID',
+      });
+      return;
+    }
+
+    // Validate vendorId
+    if (!Types.ObjectId.isValid(vendorId)) {
+      res.status(400).json({
+        status: false,
+        message: 'Invalid vendor ID',
+      });
+      return;
+    }
+
+    // Find the product by ID
+    const product = await Products.findById(productId);
+    if (!product) {
+      res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+      return;
+    }
+
+    // Check if the vendor exists within the product's vendor_prices array
+    const vendorIndex = product.vendor_prices.findIndex(vp => vp.vendor_id.toString() === vendorId);
+
+    if (vendorIndex === -1) {
+      res.status(404).json({
+        status: false,
+        message: 'Vendor not associated with this product',
+      });
+      return;
+    }
+
+    // Remove the vendor from vendor_prices
+    product.vendor_prices.splice(vendorIndex, 1);
+
+    // Also, remove the vendor from the vendors array
+    const vendorIdIndex = product.vendors.findIndex(v => v.toString() === vendorId);
+    if (vendorIdIndex !== -1) {
+      product.vendors.splice(vendorIdIndex, 1);
+    }
+
+    // Save the updated product
+    await product.save();
+
+    res.status(200).json({
+      status: true,
+      message: 'Vendor removed from product successfully',
+      product,
+    });
+  } catch (error:any) {
+    console.error('Error removing vendor from product:', error);
+    res.status(500).json({
+      status: false,
+      message: 'An error occurred while removing vendor from product',
+      error: error.message,
+    });
+  }
+};
+
+export const getAllShopsOnProduct = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const productId = req.params.productId;
+
+    // Validate productId
+    if (!Types.ObjectId.isValid(productId)) {
+      res.status(400).json({
+        status: false,
+        message: 'Invalid product ID',
+      });
+      return;
+    }
+
+    // Find the product by ID and populate vendors with shop details
+    const product = await Products.findById(productId)
+      .populate('vendors', 'name location phone email'); // Populate with specific fields
+
+    if (!product) {
+      res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      message: 'Shops retrieved successfully',
+      shops: product.vendors,
+    });
+  } catch (error:any) {
+    console.error('Error retrieving shops for product:', error);
+    res.status(500).json({
+      status: false,
+      message: 'An error occurred while retrieving shops for product',
+      error: error.message,
+    });
+  }
+};
+
+export const getSingleShopOnProduct = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { productId, vendorId } = req.params; // Extract both IDs from URL parameters
+
+    // Validate productId and vendorId
+    if (!Types.ObjectId.isValid(productId)) {
+      res.status(400).json({
+        status: false,
+        message: 'Invalid product ID',
+      });
+      return;
+    }
+    if (!Types.ObjectId.isValid(vendorId)) {
+      res.status(400).json({
+        status: false,
+        message: 'Invalid vendor ID',
+      });
+      return;
+    }
+
+    const product = await Products.findById(productId)
+      .populate({
+        path: 'vendors',
+        match: { _id: vendorId }, 
+        select: 'name location phone email', // Select specific fields
+      });
+
+    if (!product) {
+      res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+      return;
+    }
+
+    if (product.vendors.length === 0) {
+      res.status(404).json({
+        status: false,
+        message: 'Vendor not found in this product',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: true,
+      message: 'Vendor retrieved successfully',
+      shop: product.vendors[0],
+    });
+  } catch (error:any) {
+    console.error('Error retrieving vendor for product:', error);
+    res.status(500).json({
+      status: false,
+      message: 'An error occurred while retrieving vendor for product',
+      error: error.message,
+    });
+  }
+};
+
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const {product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;

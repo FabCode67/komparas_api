@@ -12,7 +12,9 @@ interface IProducts extends Document {
   product_image: string;
   vendors: Types.ObjectId[] | IShop[];
   product_specifications?: Array<{ key: string; value: string }>;
-  vendor_prices: Array<{ vendor_id: Types.ObjectId | IShop; price: number }>;
+  vendor_prices: Array<{
+    [x: string]: any; vendor_id: Types.ObjectId | IShop; price: number 
+}>;
   createdAt?: Date;
   updatedAt?: Date;
   product_price:String;
