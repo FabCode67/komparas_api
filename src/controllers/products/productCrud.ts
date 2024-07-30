@@ -7,13 +7,116 @@ import { v2 as cloudinaryV2, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
 import Shop from "../../models/shop";
 import { Types } from 'mongoose';
+export const getProducts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : 0;
+    const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice as string) : Number.MAX_SAFE_INTEGER;
+    const categoryIds = req.query.category ? (req.query.category as string).split(",").map(id => new Types.ObjectId(id)) : [];
+    const vendorIds = req.query.vendor_id ? (req.query.vendor_id as string).split(",") : [];
+    const ramValues = req.query.ram ? (req.query.ram as string).split(",") : [];
+    const storageValues = req.query.storage ? (req.query.storage as string).split(",") : [];
+    const cameraValues = req.query.camera ? (req.query.camera as string).split(",") : [];
+    const screenValues = req.query.screen ? (req.query.screen as string).split(",") : [];
+    const typesValues = req.query.types ? (req.query.types as string).split(",") : [];
+    const colorsValues = req.query.colors ? (req.query.colors as string).split(",") : [];
+    let query: any = {
+      $or: [
+        { 'vendor_prices.price': { $gte: minPrice, $lte: maxPrice } },
+        { 'vendor_prices.price': { $exists: false } }
+      ]
+    };
+    if (categoryIds.length > 0) {
+      const parentCategories = await Category.find({ _id: { $in: categoryIds } });
+      const childCategoryIds: Types.ObjectId[] = [];
+      for (const parentCategory of parentCategories) {
+        const children = await Category.find({ parent_id: parentCategory._id });
+        children.forEach(child => {
+          childCategoryIds.push(child._id);
+        });
+      }
+      const allCategoryIds = [...categoryIds, ...childCategoryIds];
+      query.category = { $in: allCategoryIds };
+    }
+
+    if (vendorIds.length > 0) {
+      query['$or'] = [
+        { 'vendor_prices.vendor_id': { $in: vendorIds } },
+        { 'vendor_prices.vendor_id': { $exists: false } }
+      ];
+    }
+    if (ramValues.length > 0) {
+      query['product_specifications'] = {
+        $elemMatch: {
+          key: { $regex: 'RAM', $options: 'i' },
+          value: { $in: ramValues.map(ram => ram.replace(/\s/g, '')) }
+        }
+      };
+    }
+    if (storageValues.length > 0) {
+      query['product_specifications'] = {
+        $elemMatch: {
+          key: "Ingano y’ububiko/ ubushobozi bwo kubika",
+          value: { $in: storageValues.map(storage => storage.replace(/\s/g, '')) }
+        }
+      };
+    }
+
+    if (cameraValues.length > 0) {
+      query['product_specifications'] = {
+        $elemMatch: {
+          key: { $regex: 'Foto', $options: 'i' },
+          value: { $in: cameraValues }
+        }
+      };
+    }
+
+    if (screenValues.length > 0) {
+      query['product_specifications'] = {
+        $elemMatch: {
+          key: 'Ikirahuri',
+          value: { $in: screenValues }
+        }
+      };
+    }
+
+    if (typesValues.length > 0) {
+      query['product_specifications'] = {
+        $elemMatch: {
+          key: 'Types',
+          value: { $in: typesValues }
+        }
+      };
+    }
+
+    if (colorsValues.length > 0) {
+      query['$or'] = [
+        {
+          'vendor_prices.colors': {
+            $elemMatch: {
+              $regex: colorsValues.map(color => `(^|,\\s*)${color}(\\s*,|$)`).join('|'),
+              $options: 'i'
+            }
+          }
+        },
+        { 'vendor_prices.colors': { $exists: false } }
+      ];
+    }
+
+    const products: IProducts[] = await Products.find(query).maxTimeMS(30000);
+    res.status(200).json({ products });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: false,
+      message: "An error occurred while retrieving the products",
+    });
+  }
+}
 
 export const addShopToProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
     const { vendor_id, price, colors } = req.body;
-
-    // Check if productId is valid
     if (!Types.ObjectId.isValid(productId)) {
       res.status(400).json({
         status: false,
@@ -165,10 +268,8 @@ export const updateShopInProduct = async (req: Request, res: Response): Promise<
 
 export const removeShopFromProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { productId, vendorId } = req.params; // Get both IDs from the URL params
-
-    // Validate productId
-    if (!Types.ObjectId.isValid(productId)) {
+    const { productId, vendorId } = req.params; 
+        if (!Types.ObjectId.isValid(productId)) {
       res.status(400).json({
         status: false,
         message: 'Invalid product ID',
@@ -176,7 +277,6 @@ export const removeShopFromProduct = async (req: Request, res: Response): Promis
       return;
     }
 
-    // Validate vendorId
     if (!Types.ObjectId.isValid(vendorId)) {
       res.status(400).json({
         status: false,
@@ -185,7 +285,6 @@ export const removeShopFromProduct = async (req: Request, res: Response): Promis
       return;
     }
 
-    // Find the product by ID
     const product = await Products.findById(productId);
     if (!product) {
       res.status(404).json({
@@ -194,8 +293,6 @@ export const removeShopFromProduct = async (req: Request, res: Response): Promis
       });
       return;
     }
-
-    // Check if the vendor exists within the product's vendor_prices array
     const vendorIndex = product.vendor_prices.findIndex(vp => vp.vendor_id.toString() === vendorId);
 
     if (vendorIndex === -1) {
@@ -206,18 +303,12 @@ export const removeShopFromProduct = async (req: Request, res: Response): Promis
       return;
     }
 
-    // Remove the vendor from vendor_prices
     product.vendor_prices.splice(vendorIndex, 1);
-
-    // Also, remove the vendor from the vendors array
     const vendorIdIndex = product.vendors.findIndex(v => v.toString() === vendorId);
     if (vendorIdIndex !== -1) {
       product.vendors.splice(vendorIdIndex, 1);
     }
-
-    // Save the updated product
     await product.save();
-
     res.status(200).json({
       status: true,
       message: 'Vendor removed from product successfully',
@@ -236,8 +327,6 @@ export const removeShopFromProduct = async (req: Request, res: Response): Promis
 export const getAllShopsOnProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const productId = req.params.productId;
-
-    // Validate productId
     if (!Types.ObjectId.isValid(productId)) {
       res.status(400).json({
         status: false,
@@ -245,10 +334,8 @@ export const getAllShopsOnProduct = async (req: Request, res: Response): Promise
       });
       return;
     }
-
-    // Find the product by ID and populate vendors with shop details
     const product = await Products.findById(productId)
-      .populate('vendors', 'name location phone email'); // Populate with specific fields
+      .populate('vendors', 'name location phone email'); 
 
     if (!product) {
       res.status(404).json({
@@ -275,9 +362,7 @@ export const getAllShopsOnProduct = async (req: Request, res: Response): Promise
 
 export const getSingleShopOnProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { productId, vendorId } = req.params; // Extract both IDs from URL parameters
-
-    // Validate productId and vendorId
+    const { productId, vendorId } = req.params;
     if (!Types.ObjectId.isValid(productId)) {
       res.status(400).json({
         status: false,
@@ -297,7 +382,7 @@ export const getSingleShopOnProduct = async (req: Request, res: Response): Promi
       .populate({
         path: 'vendors',
         match: { _id: vendorId }, 
-        select: 'name location phone email', // Select specific fields
+        select: 'name location phone email', 
       });
 
     if (!product) {
@@ -308,7 +393,7 @@ export const getSingleShopOnProduct = async (req: Request, res: Response): Promi
       return;
     }
 
-    if (product.vendors.length === 0) {
+    if (product.vendors?.length === 0) {
       res.status(404).json({
         status: false,
         message: 'Vendor not found in this product',
@@ -445,7 +530,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
 
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
+    const { product_name, product_description, category_name, product_specifications, our_review, our_price } = req.body;
     const imageFile = req.file;
     if (!imageFile) {
       res.status(400).json({
@@ -472,8 +557,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             });
             return;
           }
-          const vendors = await Shop.find({ _id: { $in: vendor_prices.map((vp: any) => vp.vendor_id) } });
-          const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
+          const productSpecifications: Array<{ key: string; value: string }> = product_specifications?.map((spec: any) => ({
             key: spec?.key?.toString(),
             value: spec?.value?.toString(),
           }));
@@ -481,28 +565,14 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             key: rev?.key?.toString(),
             value: rev?.value?.toString(),
           }));
-          const productAvailableStorages : Array<{ value: string }> = availableStorages?.map((st: any) => ({
-            value: st?.value?.toString(),
-          }))
-          const newVendorPrices = vendor_prices.map((vp: any) => ({
-            vendor_id: vp.vendor_id,
-            vendor_name: vp.vendor_name,
-            price: vp.price,
-            colors: vp.colors,
-            color: vp.color, 
-          }));
-
           const newProduct: IProducts = new Products({
             product_name: product_name,
             product_description: product_description,
             category: category._id,
             product_image: cloudinaryResult.secure_url,
-            vendors: vendors?.map(vendor => vendor._id),
             our_price: our_price,
             product_specifications: productSpecifications,
-            vendor_prices: newVendorPrices,
             our_review: productReview,
-            availableStorages: productAvailableStorages,
           });
           const newProductResult: IProducts = await newProduct.save();
           res.status(201).json({
@@ -527,183 +597,6 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-// export const updateProduct = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const { productId } = req.params;
-//     const { product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
-//     const imageFile = req.file;
-
-//     const existingProduct = await Products.findById(productId);
-//     if (!existingProduct) {
-//       res.status(404).json({
-//         status: false,
-//         message: 'Product not found',
-//       });
-//       return;
-//     }
-
-//     let cloudinaryResult:any;
-//     if (imageFile) {
-//       const result: UploadStream = cloudinaryV2.uploader.upload_stream(
-//         { folder: 'product-images' },
-//         async (error, uploadResult: any) => {
-//           if (error) {
-//             console.error(error);
-//             res.status(500).json({
-//               status: false,
-//               message: 'An error occurred while uploading the image to Cloudinary',
-//             });
-//           } else {
-//             cloudinaryResult = uploadResult;
-//           }
-//         });
-
-//       if (!result) {
-//         throw new Error("Cloudinary upload failed");
-//       }
-
-//       streamifier.createReadStream(imageFile.buffer).pipe(result);
-
-//       if (!cloudinaryResult) {
-//         return; // If image upload fails, return early
-//       }
-//     }
-
-//     const category = await Category.findOne({ name: category_name });
-//     if (!category) {
-//       res.status(404).json({
-//         status: false,
-//         message: 'Category not found',
-//       });
-//       return;
-//     }
-
-//     const vendors = await Shop.find({ _id: { $in: vendor_prices?.map((vp: any) => vp.vendor_id) } });
-//     const productSpecifications: Array<{ key: string; value: string }> = specifications?.map((spec: any) => ({
-//       key: spec?.key?.toString(),
-//       value: spec?.value?.toString(),
-//     }));
-//     const productReview: Array<{ key: string; value: string }> = our_review?.map((rev: any) => ({
-//       key: rev?.key?.toString(),
-//       value: rev?.value?.toString(),
-//     }));
-//     const productAvailableStorages: Array<{ value: string }> = availableStorages?.map((st: any) => ({
-//       value: st?.value?.toString(),
-//     }));
-//     const newVendorPrices = vendor_prices?.map((vp: any) => ({
-//       vendor_id: vp.vendor_id,
-//       vendor_name: vp.vendor_name,
-//       price: vp.price,
-//       colors: vp.colors,
-//       color: vp.color, // Add the color value here
-//     }));
-
-//     existingProduct.product_name = product_name || existingProduct.product_name;
-//     existingProduct.product_description = product_description || existingProduct.product_description;
-//     existingProduct.category = category._id || existingProduct.category;
-//     existingProduct.product_image = cloudinaryResult?.secure_url || existingProduct.product_image;
-//     existingProduct.vendors = vendors?.map(vendor => vendor._id) || existingProduct.vendors;
-//     existingProduct.our_price = our_price || existingProduct.our_price;
-//     existingProduct.product_specifications = productSpecifications || existingProduct.product_specifications;
-//     existingProduct.vendor_prices = newVendorPrices || existingProduct.vendor_prices;
-//     existingProduct.our_review = productReview || existingProduct.our_review;
-//     existingProduct.availableStorages = productAvailableStorages || existingProduct.availableStorages;
-
-//     const updatedProductResult: IProducts = await existingProduct.save();
-//     res.status(200).json({
-//       message: 'Product updated successfully',
-//       product: updatedProductResult,
-//     });
-
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({
-//       status: false,
-//       error: err,
-//       message: 'An error occurred while updating the product',
-//     });
-//   }
-// };
-
-export const getProducts = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : 0;
-    const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice as string) : Number.MAX_SAFE_INTEGER;
-    const categoryIds = req.query.category ? (req.query.category as string).split(",").map(id => new Types.ObjectId(id)) : [];
-    const vendorIds = req.query.vendor_id ? (req.query.vendor_id as string).split(",") : [];
-    const ramValues = req.query.ram ? (req.query.ram as string).split(",") : [];
-    const storageValues = req.query.storage ? (req.query.storage as string).split(",") : [];
-    const cameraValues = req.query.camera ? (req.query.camera as string).split(",") : [];
-    const screenValues = req.query.screen ? (req.query.screen as string).split(",") : [];
-    const typesValues = req.query.types ? (req.query.types as string).split(",") : [];
-    const colorsValues = req.query.colors ? (req.query.colors as string).split(",") : [];
-
-    let query: any = {
-      'vendor_prices.price': { $gte: minPrice, $lte: maxPrice }
-    };
-
-    // Retrieve child categories
-    if (categoryIds.length > 0) {
-      const parentCategories = await Category.find({ _id: { $in: categoryIds } });
-      const childCategoryIds: Types.ObjectId[] = [];
-
-      for (const parentCategory of parentCategories) {
-        const children = await Category.find({ parent_id: parentCategory._id });
-        children.forEach(child => {
-          childCategoryIds.push(child._id);
-        });
-      }
-
-      // Combine parent and child category IDs
-      const allCategoryIds = [...categoryIds, ...childCategoryIds];
-      query.category = { $in: allCategoryIds };
-    }
-
-    if (vendorIds.length > 0) {
-      query['vendor_prices.vendor_id'] = { $in: vendorIds };
-    }
-    if (ramValues.length > 0) {
-      query['product_specifications.key'] = {$regex: 'RAM', $options: 'i'};
-      query['product_specifications.value'] = { $in: ramValues.map(ram => ram.replace(/\s/g, ''))};
-    }
-    if (storageValues.length > 0) {
-      query['product_specifications.key'] = "Ingano y’ububiko/ ubushobozi bwo kubika";
-      query['product_specifications.value'] = {
-        $in: storageValues.map(storage => storage.replace(/\s/g, ''))
-      };
-      console.log(query['product_specifications.value']);
-      
-    }
-    if (cameraValues.length > 0) {
-      query['product_specifications.key'] = {$regex: 'Foto', $options: 'i'}
-      query['product_specifications.value'] = { $in: cameraValues };
-    }
-    if (screenValues.length > 0) {
-      query['product_specifications.key'] = 'Ikirahuri';
-      query['product_specifications.value'] = { $in: screenValues };
-    }
-    if (typesValues.length > 0) {
-      query['product_specifications.key'] = 'Types';
-      query['product_specifications.value'] = { $in: typesValues };
-    }
-    if (colorsValues.length > 0) {
-      query['vendor_prices.colors'] = {
-        $elemMatch: {
-          $regex: colorsValues.map(color => `(^|,\\s*)${color}(\\s*,|$)`).join('|'),
-          $options: 'i'
-        }
-      };
-    }
-    const products: IProducts[] = await Products.find(query).maxTimeMS(30000);
-    res.status(200).json({ products });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      status: false,
-      message: "An error occurred while retrieving the products",
-    });
-  }
-}
 
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -798,6 +691,7 @@ export const getProductsWithImages = async (req: Request, res: Response): Promis
     });
   }
 };
+
 export const getSingleProductWithImages = async (req: Request, res: Response): Promise<void> => {
   try {
     const productId = req.params.productId;
@@ -869,108 +763,6 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     });
   }
 };
-// export const updateProduct = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const productId = req.params.productId;
-//     const { product_name, product_description, category_name, vendor_prices, specifications, our_review } = req.body;
-//     const imageFile = req.file;
-//     if (!imageFile) {
-//       res.status(400).json({
-//         status: false,
-//         message: 'Please upload an image file',
-//       });
-//       return;
-//     }
-//     const result: UploadStream = cloudinaryV2.uploader.upload_stream(
-//       { folder: 'product-images' },
-//       async (error, cloudinaryResult: any) => {
-//         if (error) {
-//           console.error(error);
-//           res.status(500).json({
-//             status: false,
-//             message: 'An error occurred while uploading the image to Cloudinary',
-//           });
-//         } else {
-//           const category = await Category.findOne({ name: category_name });
-//           if (!category) {
-//             res.status(404).json({
-//               status: false,
-//               message: 'Category not found',
-//             });
-//             return;
-//           }
-//           let existingVendors: Types.ObjectId[] | IShop[] = [];
-//           const existingProduct = await Products.findById(productId);
-//           if (existingProduct) {
-//             existingVendors = existingProduct.vendors;
-//           }
-//           let newVendors: IShop[] = [];
-//           if (vendor_prices) {
-//             const vendorIds = vendor_prices.map((vp: any) => vp.vendor_id);
-//             newVendors = await Shop.find({ _id: { $in: vendorIds, $nin: existingVendors } });
-//           }
-//           const mergedVendors: any[] | IShop[] = [...existingVendors, ...newVendors];
-//           const updatedProduct: any = {
-//             product_name: product_name,
-//             product_description: product_description,
-//             category: category._id,
-//             product_image: cloudinaryResult.secure_url,
-//             vendors: mergedVendors.map((vendor) => (vendor instanceof Types.ObjectId ? vendor : vendor._id)),
-//             product_specifications: specifications,
-//             vendor_prices: vendor_prices,
-//             our_review: our_review,
-//           };
-//           const updatedProductResult = await Products.findByIdAndUpdate(productId, updatedProduct, {
-//             new: true,
-//           });
-//           res.status(200).json({
-//             message: 'Product updated successfully',
-//             product: updatedProductResult,
-//           });
-//         }
-//       }
-//     );
-//     if (!result) {
-//       throw new Error('Cloudinary upload failed');
-//     }
-//     streamifier.createReadStream(imageFile.buffer).pipe(result);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({
-//       status: false,
-//       error: err,
-//       message: 'An error occurred while updating the product',
-//     });
-//   }
-// };
-
-
-
-// export const getProductById = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const productId = req.params.productId;
-//     const product = await Products.findById(productId);
-//     if (!product) {
-//       res.status(404).json({
-//         status: false,
-//         message: "Product not found",
-//       });
-//       return;
-//     }
-//     res.status(200).json({
-//       status: true,
-//       product,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       status: false,
-//       message: "An error occurred while retrieving the product",
-//     });
-//   }
-
-// };
-
 
 export const getProductsByCategory = async (req: Request, res: Response): Promise<void> => {
   try {

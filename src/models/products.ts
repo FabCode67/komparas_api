@@ -18,7 +18,6 @@ const productSchema = new Schema<IProducts>({
   vendors: [{
     type: Schema.Types.ObjectId,
     ref: 'Shop',
-    required: true,
   }],
   category: {
     type: Schema.Types.ObjectId,
@@ -48,9 +47,9 @@ const productSchema = new Schema<IProducts>({
   availableStorages: [{
     value: {
       type: String,
-      required: true,
     },
   }],
+  
   vendor_prices: [{
     vendor_id: {
       type: Schema.Types.ObjectId,
