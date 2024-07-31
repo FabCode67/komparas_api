@@ -8,7 +8,6 @@ export const addShop = async (req: Request, res: Response): Promise<void> => {
     try {
         const shop: IShop = new Shop(req.body);
         const image = req.file;
-
         if (!image) {
             res.status(400).json({
                 status: false,
@@ -16,25 +15,21 @@ export const addShop = async (req: Request, res: Response): Promise<void> => {
             });
             return;
         }
-
         const working_hours: Array<{ day: string; time_range: string }> = req.body.working_hours?.map((spec: any) => ({
             day: spec?.day?.toString(),
             time_range: spec?.time_range?.toString(),
         }));
         shop.working_hours = working_hours;
-
         const existingShop = await Shop.findOne({ name: shop.name });
         if (existingShop) {
             res.status(400).json({ message: 'Shop with the same name already exists' });
             return;
         }
-
         const existingEmail = await Shop.findOne({ email: shop.email });
         if (existingEmail) {
             res.status(400).json({ message: 'Shop with the same email already exists' });
             return;
         }
-
         const result: UploadStream = cloudinaryV2.uploader.upload_stream(
             { folder: 'image' },
             async (error, cloudinaryResult: any) => {
@@ -45,13 +40,11 @@ export const addShop = async (req: Request, res: Response): Promise<void> => {
                         message: 'Something went wrong',
                     });
                 }
-
                 shop.image = cloudinaryResult.secure_url;
                 const newShop: IShop = await shop.save();
                 res.status(201).json(newShop);
             }
         );
-
         streamifier.createReadStream(image.buffer).pipe(result);
     } catch (error) {
         res.status(500).send(error);

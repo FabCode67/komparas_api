@@ -7,6 +7,7 @@ import { v2 as cloudinaryV2, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
 import Shop from "../../models/shop";
 import { Types } from 'mongoose';
+import { spec } from "node:test/reporters";
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : 0;
@@ -413,16 +414,13 @@ export const getSingleShopOnProduct = async (req: Request, res: Response): Promi
       message: 'An error occurred while retrieving vendor for product',
       error: error.message,
     });
+
   }
 };
 
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {product_name, product_description, category_name, vendor_prices, specifications, our_review, our_price, availableStorages } = req.body;
-    const imageFile = req.file;
-    const product_id = req.params.productId;
-    
-    const product = await Products.findById(product_id);
+    const product: IProducts | null = await Products.findById(req.params.productId)
     if (!product) {
       res.status(404).json({
         status: false,
@@ -430,64 +428,34 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       });
       return;
     }
-
-    if (category_name) {
-      const category = await Category.findOne({ name: category_name });
-      if (!category) {
-        res.status(404).json({
-          status: false,
-          message: 'Category not found',
-        });
-        return;
-      }
-      product.category = category._id;
+    if (!product) {
+      res.status(404).json({
+        status: false,
+        message: 'Product not found',
+      });
+      return;
     }
-
-    if (vendor_prices) {
-      const vendors = await Shop.find({ _id: { $in: vendor_prices.map((vp: any) => vp.vendor_id) } });
-      const newVendorPrices = vendor_prices.map((vp: any) => ({
-        vendor_id: vp.vendor_id,
-        vendor_name: vp.vendor_name,
-        price: vp.price,
-        colors: vp.colors,
-        color: vp.color, 
-      }));
-      product.vendors = vendors?.map(vendor => vendor._id);
-      product.vendor_prices = newVendorPrices;
-    }
-
-    if (specifications) {
-      product.product_specifications = specifications.map((spec: any) => ({
-        key: spec?.key?.toString(),
-        value: spec?.value?.toString(),
-      }));
-    }
-
-    if (our_review) {
-      product.our_review = our_review.map((rev: any) => ({
-        key: rev?.key?.toString(),
-        value: rev?.value?.toString(),
-      }));
-    }
-
-    if (availableStorages) {
-      product.availableStorages = availableStorages.map((st: any) => ({
-        value: st?.value?.toString(),
-      }));
-    }
-
-    if (product_name) {
-      product.product_name = product_name;
-    }
-
-    if (product_description) {
-      product.product_description = product_description;
-    }
-
-    if (our_price) {
-      product.our_price = our_price;
-    }
-
+    const imageFile = req.file;
+    const product_specifications:Array<{
+      key: string;
+      value: string
+    }> = req.body.product_specifications?.map((spec:any) => ({
+      key: spec?.key?.toString(),
+      value: spec?.value?.toString()
+    }));
+    const our_review:Array<{
+      key: string;
+      value: string
+    }> = req.body.our_review?.map((rev:any) => ({
+      key: rev?.key?.toString(),
+      value: rev?.value?.toString()
+    }));
+    product.product_name = req.body.product_name || product.product_name;
+    product.product_description = req.body.product_description || product.product_description;
+    product.our_price = req.body.our_price || product.our_price;
+    product.category = req.body.category || product.category;
+    product.product_specifications = product_specifications.length ? product_specifications : product.product_specifications;
+    product.our_review = our_review.length ? our_review : product.our_review;
     if (imageFile) {
       const result: UploadStream = cloudinaryV2.uploader.upload_stream(
         { folder: 'product-images' },
@@ -499,14 +467,13 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
               message: 'An error occurred while uploading the image to Cloudinary',
             });
             return;
-          } else {
-            product.product_image = cloudinaryResult.secure_url;
-            await product.save();
-            res.status(200).json({
-              message: 'Product updated successfully',
-              product,
-            });
           }
+          product.product_image = cloudinaryResult.secure_url;
+          await product.save();
+          res.status(200).json({
+            message: 'Product updated successfully',
+            product,
+          });
         }
       );
       streamifier.createReadStream(imageFile.buffer).pipe(result);
@@ -517,15 +484,16 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
         product,
       });
     }
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({
       status: false,
-      error: err,
       message: 'An error occurred while updating the product',
     });
   }
 };
+
+   
 
 
 export const addProduct = async (req: Request, res: Response): Promise<void> => {

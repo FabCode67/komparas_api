@@ -14,7 +14,6 @@ const productSchema = new Schema<IProducts>({
     type: String,
     required: true,
   },
-
   vendors: [{
     type: Schema.Types.ObjectId,
     ref: 'Shop',
