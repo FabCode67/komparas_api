@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import Subs from '../../models/subscribe'; 
 import nodemailer from 'nodemailer';
-import { google } from 'googleapis';
 import { v4 as uuidv4 } from 'uuid'; 
 import dotenv from 'dotenv';
 dotenv.config();
