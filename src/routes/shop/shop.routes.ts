@@ -1,6 +1,5 @@
 import express from 'express';
 import { getAllShops, getShopById, addShop, updateShop, deleteShop } from '../../controllers/shop/shop';
-import { isAdminAuthenticat } from '../../middleware/auth/authorization';
 import multer from "multer";
 import { addKomparasCode, getKomparasCodes } from '../../controllers/shop/komparasCode';
 const storage = multer.memoryStorage();
