@@ -456,6 +456,15 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     product.category = req.body.category || product.category;
     product.product_specifications = product_specifications.length ? product_specifications : product.product_specifications;
     product.our_review = our_review.length ? our_review : product.our_review;
+    // check if the product has a product number if not generate one
+    if (!product.product_number) {
+      product.product_number = Math.floor(Math.random() * 1000000);
+    }
+    // check if the product number already exists
+    const existingProductNumber = await Products.findOne({ product_number: product.product_number });
+    if (existingProductNumber) {
+      product.product_number = Math.floor(Math.random() * 1000000);
+    }
     if (imageFile) {
       const result: UploadStream = cloudinaryV2.uploader.upload_stream(
         { folder: 'product-images' },
@@ -533,6 +542,13 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             key: rev?.key?.toString(),
             value: rev?.value?.toString(),
           }));
+            // add auto incriment product number
+            let product_number = Math.floor(Math.random() * 1000000);
+            // check if the product number already exists
+            const existingProductNumber = await Products.findOne({ product_number });
+            if (existingProductNumber) {
+              product_number = Math.floor(Math.random() * 1000000);
+            }
           const newProduct: IProducts = new Products({
             product_name: product_name,
             product_description: product_description,
@@ -541,6 +557,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
             our_price: our_price,
             product_specifications: productSpecifications,
             our_review: productReview,
+            product_number: product_number,
           });
           const newProductResult: IProducts = await newProduct.save();
           res.status(201).json({
@@ -776,9 +793,7 @@ export const removeProductSpecification = async (req: Request, res: Response): P
   try {
     const productId = req.params.productId;
     const specificationId = req.params.specificationId;
-
     const product = await Products.findById(productId);
-
     if (!product) {
       res.status(404).json({
         status: false,

@@ -19,6 +19,8 @@ const ShopSchema: Schema = new Schema({
     email: { type: String, unique: true },
     description: { type: String },
     image: { type: String },
+    // add auto incriment shop number
+    shop_number: { type: Number }
 }, { timestamps: true });
 
 export default mongoose.model<IShop>('Shop', ShopSchema);

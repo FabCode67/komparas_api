@@ -11,5 +11,6 @@ export interface IShop extends Document {
     colors:any,
     image: string;
     location_discription: string;
+    shop_number: number;
 }
 

@@ -10,6 +10,7 @@ interface IProducts extends Document {
   product_description: string;
   category: Types.ObjectId | ICategory;
   product_image: string;
+  product_number: number;
   vendors: Types.ObjectId[] | IShop[];
   product_specifications?: Array<{ key: string; value: string }>;
   vendor_prices: Array<{

@@ -10,6 +10,9 @@ const productSchema = new Schema<IProducts>({
     type: String,
     required: true,
   },
+  product_number: {
+    type: Number,
+  },
   product_image: {
     type: String,
     required: true,

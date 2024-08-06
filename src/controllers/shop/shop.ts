@@ -41,6 +41,13 @@ export const addShop = async (req: Request, res: Response): Promise<void> => {
                     });
                 }
                 shop.image = cloudinaryResult.secure_url;
+                // add auto incriment shop number
+                shop.shop_number = Math.floor(Math.random() * 1000000);
+                // check if the shop number already exists
+                const existingShopNumber = await Shop.findOne({ shop_number: shop.shop_number });
+                if (existingShopNumber) {
+                    shop.shop_number = Math.floor(Math.random() * 1000000);
+                }
                 const newShop: IShop = await shop.save();
                 res.status(201).json(newShop);
             }
@@ -71,7 +78,15 @@ export const updateShop = async (req: Request, res: Response): Promise<void> => 
         shop.email = req.body.email || shop.email;
         shop.location_discription = req.body.location_discription || shop.location_discription;
         shop.description = req.body.description || shop.description;
-
+        // check if the shop has a shop number if not generate one
+        if (!shop.shop_number) {
+            shop.shop_number = Math.floor(Math.random() * 1000000);
+        }
+        // check if the shop number already exists
+        const existingShopNumber = await Shop.findOne({ shop_number: shop.shop_number });
+        if (existingShopNumber) {
+            shop.shop_number = Math.floor(Math.random() * 1000000); 
+        }
         if (image) {
             const result: UploadStream = cloudinaryV2.uploader.upload_stream(
                 { folder: 'image' },
