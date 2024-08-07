@@ -211,3 +211,32 @@ export const getKomparasCodes = async (req: Request, res: Response): Promise<voi
         res.status(500).send(error);
     }
 };
+
+export const getKomparasCodeBykomparasCode = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const komparasCode: IKomparasCode | null = await KomparasCode.findOne({ komparasCode: req.params.komparasCode });
+        // check if the komparasCode exists
+
+        if (!komparasCode) {
+            res.status(404).json({ status:false, error: 'Komparas Code ukoresheje ntibaho' });
+            return;
+        }
+        res.status(200).json({ komparasCode });
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}
+
+export const updateIsSoldConfirmToTrue = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const komparasCode: IKomparasCode | null = await KomparasCode.findOne({ komparasCode: req.params.komparasCode });
+        if (!komparasCode) {
+            res.status(404).json({ status:false, error: 'Komparas Code ukoresheje ntibaho' });
+            return;
+        }
+        await KomparasCode.findOneAndUpdate({ komparasCode: req.params.komparasCode }, { sold_confirm: true });
+        res.status(200).json({ status:true, message: 'Koparas Kode Yemejwe neza!' });
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}
