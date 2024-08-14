@@ -22,6 +22,8 @@ export const addKomparasCode = async (req: Request, res: Response): Promise<void
             return;
         }
         const { phoneNumberOrEmail } = req.body;
+        const confirmationLink = `https://komparas.netlify.app/confirm/${komparasCode.komparasCode}`; 
+
         const mailOptions = {
             from: 'mwanafunzifabrice@gmail.com',
             to: phoneNumberOrEmail,
@@ -64,6 +66,8 @@ export const addKomparasCode = async (req: Request, res: Response): Promise<void
                         <h3>Komparas kode Yawe ni: 👉👉 <h1>
                         ${komparasCode.komparasCode}
                         </h1></h3>
+                                         <h1>Nyura hano wemere ko waguze👉👉 <a href=${confirmationLink}>EMEZA</a></h1>
+
                       </p> 
                     </td> 
                   </tr> 

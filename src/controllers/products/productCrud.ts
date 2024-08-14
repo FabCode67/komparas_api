@@ -502,7 +502,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-   
+
 
 
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
