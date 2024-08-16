@@ -1,9 +1,11 @@
-import { Request, Response } from 'express';
+import e, { Request, Response } from 'express';
 import KomparasCode from '../../models/komparasCode';
 import { IKomparasCode } from '../../types/komparasCode';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
+import twilio from 'twilio';
+
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -13,6 +15,8 @@ const transporter = nodemailer.createTransport({
         pass: process.env.PASSWORD1,
     },
 });
+
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 export const addKomparasCode = async (req: Request, res: Response): Promise<void> => {
     try {
         const komparasCode: IKomparasCode = new KomparasCode(req.body);
@@ -22,7 +26,10 @@ export const addKomparasCode = async (req: Request, res: Response): Promise<void
             return;
         }
         const { phoneNumberOrEmail } = req.body;
+        const {fullName} = req.body;
+        const {contactMethod} = req.body;
         const confirmationLink = `https://komparas.netlify.app/confirm/${komparasCode.komparasCode}`; 
+
 
         const mailOptions = {
             from: 'mwanafunzifabrice@gmail.com',
@@ -200,7 +207,28 @@ export const addKomparasCode = async (req: Request, res: Response): Promise<void
             
         `,
         };
-        await transporter.sendMail(mailOptions);
+        if(contactMethod === 'email') {
+            await transporter.sendMail(mailOptions);
+        } else if(contactMethod === 'whatsapp') {
+        await client.messages.create({
+          body: `*KUVA KURI KOMPARASI*
+          Uraho neza @${fullName}! Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze:  <a href=${confirmationLink}>NDEMEZA KO NAGUSe</a>
+          `,
+          from: 'whatsapp:+14155238886',
+          to: `whatsapp:${phoneNumberOrEmail}`
+      });
+        }
+        else {
+            await transporter.sendMail(mailOptions);
+            await client.messages.create({
+                body: `*KUVA KURI KOMPARASI*
+                Uraho neza @${fullName}! Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze:  <a href=${confirmationLink}>NDEMEZA KO NAGUSe</a>
+                `,
+          from: 'whatsapp:+14155238886',
+          to: `whatsapp:${phoneNumberOrEmail}`
+            });
+        }
+        // await transporter.sendMail(mailOptions);
         const newKomparasCode: IKomparasCode = await komparasCode.save();
         res.status(201).json(newKomparasCode);
     } catch (error) {
