@@ -26,11 +26,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const ShopSchema = new mongoose_1.Schema({
     name: { type: String, required: true, unique: true },
+    owner: { type: String },
     location: { type: String, required: true },
-    working_hours: { type: String },
+    location_coordinates: {
+        lat: { type: Number },
+        lng: { type: Number
+        }
+    },
+    location_discription: { type: String },
+    working_hours: [{
+            day: { type: String },
+            time_range: { type: String }
+        }],
     phone: { type: String },
     email: { type: String, unique: true },
     description: { type: String },
     image: { type: String },
+    // add auto incriment shop number
+    shop_number: { type: Number }
 }, { timestamps: true });
 exports.default = mongoose_1.default.model('Shop', ShopSchema);

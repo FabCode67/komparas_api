@@ -1,12 +1,24 @@
-import e, { Request, Response } from 'express';
-import KomparasCode from '../../models/komparasCode';
-import { IKomparasCode } from '../../types/komparasCode';
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
-dotenv.config();
-import twilio from 'twilio';
-
-const transporter = nodemailer.createTransport({
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.updateIsSoldConfirmToTrue = exports.getKomparasCodeBykomparasCode = exports.getKomparasCodes = exports.addKomparasCode = void 0;
+const komparasCode_1 = __importDefault(require("../../models/komparasCode"));
+const nodemailer_1 = __importDefault(require("nodemailer"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+const twilio_1 = __importDefault(require("twilio"));
+const transporter = nodemailer_1.default.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
@@ -15,22 +27,19 @@ const transporter = nodemailer.createTransport({
         pass: process.env.PASSWORD1,
     },
 });
-
-const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-export const addKomparasCode = async (req: Request, res: Response): Promise<void> => {
+const client = (0, twilio_1.default)(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+const addKomparasCode = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const komparasCode: IKomparasCode = new KomparasCode(req.body);
-        const existingKomparasCode = await KomparasCode.findOne({ komparasCode: komparasCode.komparasCode });
+        const komparasCode = new komparasCode_1.default(req.body);
+        const existingKomparasCode = yield komparasCode_1.default.findOne({ komparasCode: komparasCode.komparasCode });
         if (existingKomparasCode) {
             res.status(400).json({ message: 'Komparas Code already exists' });
             return;
         }
         const { phoneNumberOrEmail } = req.body;
-        const {fullName} = req.body;
-        const {contactMethod} = req.body;
-        const confirmationLink = `https://komparas.netlify.app/confirm/${komparasCode.komparasCode}`; 
-
-
+        const { fullName } = req.body;
+        const { contactMethod } = req.body;
+        const confirmationLink = `https://komparas.netlify.app/confirm/${komparasCode.komparasCode}`;
         const mailOptions = {
             from: 'mwanafunzifabrice@gmail.com',
             to: phoneNumberOrEmail,
@@ -207,68 +216,74 @@ export const addKomparasCode = async (req: Request, res: Response): Promise<void
             
         `,
         };
-        if(contactMethod === 'email') {
-            await transporter.sendMail(mailOptions);
-        } else if(contactMethod === 'whatsapp') {
-        await client.messages.create({
-          body: `*KUVA KURI KOMPARASI*
-                  Uraho neza ${fullName}! Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze : ${confirmationLink}
+        if (contactMethod === 'email') {
+            yield transporter.sendMail(mailOptions);
+        }
+        else if (contactMethod === 'whatsapp') {
+            yield client.messages.create({
+                body: `*KUVA KURI KOMPARASI*
+          Uraho neza @${fullName}! Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze:  <a href=${confirmationLink}>NDEMEZA KO NAGUSe</a>
           `,
-          from: 'whatsapp:+14155238886',
-          to: `whatsapp:${phoneNumberOrEmail}`
-      });
+                from: 'whatsapp:+14155238886',
+                to: `whatsapp:${phoneNumberOrEmail}`
+            });
         }
         else {
-            await transporter.sendMail(mailOptions);
-            await client.messages.create({
+            yield transporter.sendMail(mailOptions);
+            yield client.messages.create({
                 body: `*KUVA KURI KOMPARASI*
-                Uraho neza ${fullName} Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze:${confirmationLink}
+                Uraho neza @${fullName}! Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze:  <a href=${confirmationLink}>NDEMEZA KO NAGUSe</a>
                 `,
-          from: 'whatsapp:+14155238886',
-          to: `whatsapp:${phoneNumberOrEmail}`
+                from: 'whatsapp:+14155238886',
+                to: `whatsapp:${phoneNumberOrEmail}`
             });
         }
         // await transporter.sendMail(mailOptions);
-        const newKomparasCode: IKomparasCode = await komparasCode.save();
+        const newKomparasCode = yield komparasCode.save();
         res.status(201).json(newKomparasCode);
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).send(error);
     }
-};
-export const getKomparasCodes = async (req: Request, res: Response): Promise<void> => {
+});
+exports.addKomparasCode = addKomparasCode;
+const getKomparasCodes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const komparasCodes: IKomparasCode[] = await KomparasCode.find();
+        const komparasCodes = yield komparasCode_1.default.find();
         res.status(200).json({ komparasCodes });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).send(error);
     }
-};
-
-export const getKomparasCodeBykomparasCode = async (req: Request, res: Response): Promise<void> => {
+});
+exports.getKomparasCodes = getKomparasCodes;
+const getKomparasCodeBykomparasCode = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const komparasCode: IKomparasCode | null = await KomparasCode.findOne({ komparasCode: req.params.komparasCode });
+        const komparasCode = yield komparasCode_1.default.findOne({ komparasCode: req.params.komparasCode });
         // check if the komparasCode exists
-
         if (!komparasCode) {
-            res.status(404).json({ status:false, error: 'Komparas Code ukoresheje ntibaho' });
+            res.status(404).json({ status: false, error: 'Komparas Code ukoresheje ntibaho' });
             return;
         }
         res.status(200).json({ komparasCode });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).send(error);
     }
-}
-
-export const updateIsSoldConfirmToTrue = async (req: Request, res: Response): Promise<void> => {
+});
+exports.getKomparasCodeBykomparasCode = getKomparasCodeBykomparasCode;
+const updateIsSoldConfirmToTrue = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const komparasCode: IKomparasCode | null = await KomparasCode.findOne({ komparasCode: req.params.komparasCode });
+        const komparasCode = yield komparasCode_1.default.findOne({ komparasCode: req.params.komparasCode });
         if (!komparasCode) {
-            res.status(404).json({ status:false, error: 'Komparas Code ukoresheje ntibaho' });
+            res.status(404).json({ status: false, error: 'Komparas Code ukoresheje ntibaho' });
             return;
         }
-        await KomparasCode.findOneAndUpdate({ komparasCode: req.params.komparasCode }, { sold_confirm: true });
-        res.status(200).json({ status:true, message: 'Koparas Kode Yemejwe neza!' });
-    } catch (error) {
+        yield komparasCode_1.default.findOneAndUpdate({ komparasCode: req.params.komparasCode }, { sold_confirm: true });
+        res.status(200).json({ status: true, message: 'Koparas Kode Yemejwe neza!' });
+    }
+    catch (error) {
         res.status(500).send(error);
     }
-}
+});
+exports.updateIsSoldConfirmToTrue = updateIsSoldConfirmToTrue;

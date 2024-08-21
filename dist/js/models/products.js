@@ -10,6 +10,9 @@ const productSchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
+    product_number: {
+        type: Number,
+    },
     product_image: {
         type: String,
         required: true,
@@ -17,7 +20,6 @@ const productSchema = new mongoose_1.Schema({
     vendors: [{
             type: mongoose_1.Schema.Types.ObjectId,
             ref: 'Shop',
-            required: true,
         }],
     category: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -47,7 +49,6 @@ const productSchema = new mongoose_1.Schema({
     availableStorages: [{
             value: {
                 type: String,
-                required: true,
             },
         }],
     vendor_prices: [{
