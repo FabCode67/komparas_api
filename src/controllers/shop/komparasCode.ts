@@ -4,7 +4,7 @@ import { IKomparasCode } from '../../types/komparasCode';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
-import twilio from 'twilio';
+
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -16,7 +16,6 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 export const addKomparasCode = async (req: Request, res: Response): Promise<void> => {
     try {
         const komparasCode: IKomparasCode = new KomparasCode(req.body);
@@ -26,7 +25,6 @@ export const addKomparasCode = async (req: Request, res: Response): Promise<void
             return;
         }
         const { phoneNumberOrEmail } = req.body;
-        const {fullName} = req.body;
         const {contactMethod} = req.body;
         const confirmationLink = `https://komparas.netlify.app/confirm/${komparasCode.komparasCode}`; 
 
@@ -209,25 +207,8 @@ export const addKomparasCode = async (req: Request, res: Response): Promise<void
         };
         if(contactMethod === 'email') {
             await transporter.sendMail(mailOptions);
-        } else if(contactMethod === 'whatsapp') {
-        await client.messages.create({
-          body: `*KUVA KURI KOMPARASI*
-                  Uraho neza ${fullName}! Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze : ${confirmationLink}
-          `,
-          from: 'whatsapp:+14155238886',
-          to: `whatsapp:${phoneNumberOrEmail}`
-      });
         }
-        else {
-            await transporter.sendMail(mailOptions);
-            await client.messages.create({
-                body: `*KUVA KURI KOMPARASI*
-                Uraho neza ${fullName} Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze:${confirmationLink}
-                `,
-          from: 'whatsapp:+14155238886',
-          to: `whatsapp:${phoneNumberOrEmail}`
-            });
-        }
+       
         const newKomparasCode: IKomparasCode = await komparasCode.save();
         res.status(201).json(newKomparasCode);
     } catch (error) {
