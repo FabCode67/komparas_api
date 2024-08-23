@@ -228,7 +228,6 @@ export const addKomparasCode = async (req: Request, res: Response): Promise<void
           to: `whatsapp:${phoneNumberOrEmail}`
             });
         }
-        // await transporter.sendMail(mailOptions);
         const newKomparasCode: IKomparasCode = await komparasCode.save();
         res.status(201).json(newKomparasCode);
     } catch (error) {
