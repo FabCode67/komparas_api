@@ -48,6 +48,7 @@ app.use(index_routes_1.default.customerRoutes);
 app.use(index_routes_1.default.nativeProductsRoutes);
 app.use(index_routes_1.default.comparisionRoutes);
 app.use(index_routes_1.default.DayphoneRoutes);
+app.use(index_routes_1.default.applicationRouter);
 // app.use(allRoutes.newCatrouters);
 app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(docs_1.default));
 dotenv_1.default.config();

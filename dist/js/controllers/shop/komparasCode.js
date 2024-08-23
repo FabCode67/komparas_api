@@ -222,7 +222,7 @@ const addKomparasCode = (req, res) => __awaiter(void 0, void 0, void 0, function
         else if (contactMethod === 'whatsapp') {
             yield client.messages.create({
                 body: `*KUVA KURI KOMPARASI*
-          Uraho neza @${fullName}! Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze:  <a href=${confirmationLink}>NDEMEZA KO NAGUSe</a>
+                  Uraho neza ${fullName}! Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze : ${confirmationLink}
           `,
                 from: 'whatsapp:+14155238886',
                 to: `whatsapp:${phoneNumberOrEmail}`
@@ -232,7 +232,7 @@ const addKomparasCode = (req, res) => __awaiter(void 0, void 0, void 0, function
             yield transporter.sendMail(mailOptions);
             yield client.messages.create({
                 body: `*KUVA KURI KOMPARASI*
-                Uraho neza @${fullName}! Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze:  <a href=${confirmationLink}>NDEMEZA KO NAGUSe</a>
+                Uraho neza ${fullName} Komparas kode yawe ni: ${komparasCode.komparasCode} Nyura hano wemere ko waguze:${confirmationLink}
                 `,
                 from: 'whatsapp:+14155238886',
                 to: `whatsapp:${phoneNumberOrEmail}`

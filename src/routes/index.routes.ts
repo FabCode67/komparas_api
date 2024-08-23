@@ -11,6 +11,7 @@ import customerRoutes from "./customer/customer.routes"
 import nativeProductsRoutes from "./products/nativeProducts.routes"
 import comparisionRoutes from "./comparision/comparision.routes"
 import DayphoneRoutes from "./products/offer.routes"
+import applicationRouter from "./job/application.routes";
 
 export default {
     userRoutes,
@@ -24,5 +25,6 @@ export default {
     customerRoutes,
     nativeProductsRoutes,
     comparisionRoutes,
-    DayphoneRoutes
+    DayphoneRoutes,
+    applicationRouter
 };
