@@ -16,6 +16,7 @@ const customer_routes_1 = __importDefault(require("./customer/customer.routes"))
 const nativeProducts_routes_1 = __importDefault(require("./products/nativeProducts.routes"));
 const comparision_routes_1 = __importDefault(require("./comparision/comparision.routes"));
 const offer_routes_1 = __importDefault(require("./products/offer.routes"));
+const application_routes_1 = __importDefault(require("./job/application.routes"));
 exports.default = {
     userRoutes: usersCrud_routes_1.default,
     loginRoutes: login_routes_1.default,
@@ -28,5 +29,6 @@ exports.default = {
     customerRoutes: customer_routes_1.default,
     nativeProductsRoutes: nativeProducts_routes_1.default,
     comparisionRoutes: comparision_routes_1.default,
-    DayphoneRoutes: offer_routes_1.default
+    DayphoneRoutes: offer_routes_1.default,
+    applicationRouter: application_routes_1.default
 };
