@@ -41,3 +41,16 @@ export const getJobApplicationById = async (req: Request, res: Response): Promis
         throw error;
     }
 };
+
+export const deleteJobApplication = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const id: string = req.params.id;
+        const deletedJobApplication: IjobApplicant | null = await JobApplicant.findByIdAndRemove({ _id: id });
+        if (!deletedJobApplication) {
+            res.status(404).json({ message: 'Ibyo musabye ntabihari, mwongere mugerageze!' });
+        }
+        res.status(200).json({ message: 'Bikozwe neza'});
+    } catch (error) {
+        throw error;
+    }
+};
