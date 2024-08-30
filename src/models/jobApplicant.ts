@@ -18,7 +18,12 @@ const jobApplicantSchema: Schema = new Schema(
         backgroundInfo: {
             type: String,
             required: true
+        },
+        isPriotized: {
+            type: Boolean,
+            default: false
         }
+
     },
     { timestamps: true }
 );
