@@ -6,6 +6,7 @@ import Document from 'mongoose';
     email: string;
     phone: string;
     backgroundInfo: string;
-}
+    isPriotized: boolean;
+ }
 
 export default IjobApplicant;

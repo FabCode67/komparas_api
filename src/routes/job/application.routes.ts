@@ -1,6 +1,8 @@
 import express from 'express';
-import { sendJobApplication, getJobApplications, getJobApplicationById, deleteJobApplication } from '../../controllers/jobApplicant';
+import { sendJobApplication, getJobApplications, getJobApplicationById, deleteJobApplication, togglePriority } from '../../controllers/jobApplicant';
 import isaValidApplication from '../../middleware/validApllication';
+import { replyToJobApplicant } from '../../controllers/replyJobApplicant';
+
 
 import { isAdminAuthenticat } from '../../middleware/auth/authorization';
 
@@ -10,5 +12,7 @@ applicationRouter.post('/job-applications', isaValidApplication, sendJobApplicat
 applicationRouter.get('/job-applications' ,getJobApplications);
 applicationRouter.get('/job-applications/:id', getJobApplicationById);
 applicationRouter.delete('/job-applications/:id', deleteJobApplication);
+applicationRouter.post('/job-applications/:id/reply', replyToJobApplicant);
+applicationRouter.put('/job-applications/:id/prioritize', togglePriority);
 
 export default applicationRouter;

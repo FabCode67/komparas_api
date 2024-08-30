@@ -54,3 +54,18 @@ export const deleteJobApplication = async (req: Request, res: Response): Promise
         throw error;
     }
 };
+
+export const togglePriority = async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
+    try {
+      const id: string = req.params.id;
+      const jobApplication = await JobApplicant.findById(id);
+      if (!jobApplication) {
+        return res.status(404).json({ message: 'Application not found' });
+      }
+      jobApplication.isPriotized = !jobApplication.isPriotized;
+      await jobApplication.save();
+      return res.status(200).json({ message: 'Priority updated successfully', data: jobApplication });
+    } catch (error) {
+      return res.status(500).json({ message: 'Server error', error });
+    }
+};
