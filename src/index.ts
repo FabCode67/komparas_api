@@ -2,41 +2,49 @@ import express, { Express } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import allRoutes from "./routes/index.routes";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 import swaggerUI from "swagger-ui-express";
 import docs from "./docs";
 import { v2 as cloudinary } from "cloudinary";
+import { Server } from 'socket.io';
+import http from 'http';
 
+dotenv.config(); // Load environment variables as early as possible
 
 const app: Express = express();
-// const PORT: string | number = process.env.PORT || 8080;
-const corsOpts = {
-  origin: '*',
-  
-  methods: [
-  'GET',
-  'POST',
-  'DELETE',
-  'PATCH',
-  'PUT'
-  ],
-  
-  allowedHeaders: [
-  'Content-Type',
-  'Authorization',
-  ],
-  };
-app.use(cors(corsOpts));
+const server = http.createServer(app);
 
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
+const corsOpts = {
+  origin: "http://localhost:5173", 
+  methods: ['GET', 'POST', 'DELETE', 'PATCH', 'PUT'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOpts));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use("/users/add", upload.single("profile_picture"));
+
 cloudinary.config({
-  cloud_name: 'dqksbyovs', 
-  api_key: '298781338488113', 
-  api_secret: 'qsZBss7xJK8yKMoK_ruktBkFt2o' 
-  });
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
 
 app.use(allRoutes.userRoutes);
 app.use(allRoutes.loginRoutes);
@@ -51,21 +59,21 @@ app.use(allRoutes.nativeProductsRoutes);
 app.use(allRoutes.comparisionRoutes);
 app.use(allRoutes.DayphoneRoutes);
 app.use(allRoutes.applicationRouter);
-// app.use(allRoutes.newCatrouters);
-app.use('/api-docs',swaggerUI.serve,swaggerUI.setup(docs));
 
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(docs));
 
-dotenv.config()
-const port = process.env.PORT || 10000
-let uri: string;
-uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@komparas.jx1hf07.mongodb.net/?retryWrites=true&w=majority`;
+const port = process.env.PORT || 10000;
+const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@komparas.jx1hf07.mongodb.net/?retryWrites=true&w=majority`;
+
 mongoose
   .connect(uri)
-  .then(() =>
-    app.listen(port, () => console.log(`server running on port ${port}`))
-  )
+  .then(() => {
+    server.listen(port, () => console.log(`Server running on port ${port}`));
+  })
   .catch((error) => {
+    console.error("MongoDB connection error:", error);
     throw error;
   });
 
-export default app
+export default app;
+export { server, io };
