@@ -19,7 +19,9 @@ export interface IKomparasCode extends Document {
     komparasCode:string;
     shopId:any;
     shopName:string;
+    shopEmail:string;
     product_id:string | any;
     sold_confirm:boolean;
+    shop_sold_confirm:boolean;
 }
 
