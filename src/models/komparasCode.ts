@@ -11,8 +11,10 @@ const KomparasCodeSchema = new Schema<IKomparasCode>({
     komparasCode: { type: String},
     shopId: { type: String},
     shopName: { type: String},
+    shopEmail: { type: String},
     product_id: { type: String},
     sold_confirm: { type: Boolean, default: false},
+    shop_sold_confirm: { type: Boolean, default: false, required: true},
 },
      { timestamps: true });
 
