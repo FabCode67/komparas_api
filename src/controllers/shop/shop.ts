@@ -41,7 +41,7 @@ export const addShop = async (req: Request, res: Response): Promise<void> => {
                     });
                 }
                 shop.image = cloudinaryResult.secure_url;
-                // add auto incriment shop number
+                // add auto incriment shop numbe
                 shop.shop_number = Math.floor(Math.random() * 1000000);
                 // check if the shop number already exists
                 const existingShopNumber = await Shop.findOne({ shop_number: shop.shop_number });
@@ -49,7 +49,7 @@ export const addShop = async (req: Request, res: Response): Promise<void> => {
                     shop.shop_number = Math.floor(Math.random() * 1000000);
                 }
                 const newShop: IShop = await shop.save();
-                res.status(201).json(newShop);
+                res.status(201).json({ message: 'Shop added successfully', newShop });
             }
         );
         streamifier.createReadStream(image.buffer).pipe(result);
@@ -113,6 +113,8 @@ export const updateShop = async (req: Request, res: Response): Promise<void> => 
     }
 };
 
+// get all shops that are accepted
+
 export const getAllShops = async (req: Request, res: Response): Promise<void> => {
     try {
         const shops: IShop[] = await Shop.find();
@@ -147,3 +149,21 @@ export const deleteShop = async (req: Request, res: Response): Promise<void> => 
         res.status(500).send(error);
     }
 };
+
+//mark shop as accepted or unacceptable using toggling the isAccepted field
+
+export const toggleShopAcceptance = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const shop: IShop | null = await Shop.findById(req.params.id);
+        if (shop) {
+            shop.isAccepted = !shop.isAccepted;
+            const updatedShop: IShop = await shop.save();
+            res.status(200).json({ message: 'Shop acceptance status updated successfully', updatedShop });
+        } else {
+            res.status(404).send('Shop not found');
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+};
+
