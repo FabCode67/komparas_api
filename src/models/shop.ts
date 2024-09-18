@@ -20,7 +20,8 @@ const ShopSchema: Schema = new Schema({
     description: { type: String },
     image: { type: String },
     // add auto incriment shop number
-    shop_number: { type: Number }
+    shop_number: { type: Number },
+    isAccepted: { type: Boolean, default: false },
 }, { timestamps: true });
 
 export default mongoose.model<IShop>('Shop', ShopSchema);

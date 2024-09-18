@@ -12,5 +12,6 @@ export interface IShop extends Document {
     image: string;
     location_discription: string;
     shop_number: number;
+    isAccepted: boolean;
 }
 

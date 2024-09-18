@@ -41,10 +41,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
-  api_key: process.env.CLOUDINARY_API_KEY!,
-  api_secret: process.env.CLOUDINARY_API_SECRET!,
-});
+  cloud_name: 'dqksbyovs', 
+  api_key: '298781338488113', 
+  api_secret: 'qsZBss7xJK8yKMoK_ruktBkFt2o' 
+  });
 
 app.use(allRoutes.userRoutes);
 app.use(allRoutes.loginRoutes);
