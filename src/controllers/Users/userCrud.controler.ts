@@ -11,7 +11,6 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
         const { first_name, last_name, email, password, confirm_password } = req.body;
         const imageFile = req.file;
 
-        // Check if at least one of the required fields is present
         if (!first_name || !last_name || !email || !password || !confirm_password ) {
             res.status(400).json({
                 status: false,
@@ -43,9 +42,6 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
             });
             return;
         }
-
-        // Check if user with the same email already exists
-
         const existingUser: IUser | null = await Users.findOne({ email: email });
         if (existingUser) {
             res.status(400).json({
@@ -57,7 +53,6 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
 
         
 
-        // If an image file is provided, handle the upload
         if (imageFile) {
             const result: UploadStream = cloudinaryV2.uploader.upload_stream(
                 { folder: 'product-image' },
@@ -69,7 +64,6 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
                             message: 'An error occurred while uploading the image to Cloudinary',
                         });
                     } else {
-                        // Rest of your code for validation and user creation with profile picture
                         const hashedPassword = await bcrypt.hash(password, 10);
 
                         const newUser: IUser = new Users({
@@ -98,9 +92,7 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
 
             streamifier.createReadStream(imageFile.buffer).pipe(result);
         } else {
-            // If no image file is provided, create user without profile picture
             const hashedPassword = await bcrypt.hash(password, 10);
-
             const newUser: IUser = new Users({
                 first_name: first_name,
                 last_name: last_name,
@@ -110,7 +102,6 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
                 role: 'buyer',
                 status: "enabled",
             });
-
             const savedUser: IUser = await newUser.save();
             res.status(201).json({
                 message: 'User added successfully',
