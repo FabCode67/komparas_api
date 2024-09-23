@@ -178,3 +178,35 @@ export const getLatestComparasCodeByfullName = async (req: Request, res: Respons
         res.status(500).send(error);
     }
 }
+
+export const getLatestComparasCodeByEmailOrPhoneNumber = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const komparasCode: IKomparasCode | null = await KomparasCode
+            .findOne({phoneNumberOrEmail: req.params.emailOrPhoneNumber})
+            .sort({ createdAt: -1 });
+        if (!komparasCode) {
+            res.status(404).json({ status:false, error: 'Komparas Code ukoresheje ntibaho' });
+            return;
+        }
+        const mailOptions = {
+          from: 'mwanafunzifabrice@gmail.com',
+          to: komparasCode.phoneNumberOrEmail, 
+          subject: 'Your Komparas Code', 
+          text: `Dear ${komparasCode.fullName},\n\nYour Komparas Code is: ${komparasCode.komparasCode}\n\nThank you for shopping with ${komparasCode.shopName}.`, // Plain text body
+      };
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).json({ status: false, error: 'Failed to send email' });
+        } else {
+            console.log('Email sent: ' + info.response);
+            return res.status(200).json({ status: true, message: 'Email sent successfully', komparasCode });
+        }
+    });
+
+         res.status(200).json({ komparasCode });
+    } catch (error) {
+        res
+            .status(500)
+    }
+}
