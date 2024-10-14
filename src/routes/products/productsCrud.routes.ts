@@ -19,7 +19,7 @@ import {
     getSingleShopOnProduct,
     getAllShopsOnProduct,
 } from "../../controllers/products/productCrud";
-import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
+import { authenticate } from "../../middleware/auth/authorization";
 import multer from "multer";
 const storage = multer.memoryStorage();
 const upload = multer({ storage });

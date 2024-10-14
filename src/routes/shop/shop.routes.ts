@@ -2,12 +2,13 @@ import express from 'express';
 import { getAllShops, getShopById, addShop, updateShop, deleteShop, toggleShopAcceptance } from '../../controllers/shop/shop';
 import multer from "multer";
 import { addKomparasCode, getKomparasCodes, getKomparasCodeBykomparasCode, updateIsSoldConfirmToTrue, updateIsShopSoldConfirmToTrue, getLatestComparasCodeByfullName, getLatestComparasCodeByEmailOrPhoneNumber } from '../../controllers/shop/komparasCode';
+import { authenticate } from '../../middleware/auth/authorization';
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 const router = express.Router();
 
-router.get('/shops', getAllShops);
+router.get('/shops', authenticate, getAllShops);
 router.get('/shops/:id', getShopById);
 router.post('/shops/add',upload.single('image'), addShop);
 router.put('/shops/:id',upload.single('image'), updateShop);

@@ -3,7 +3,7 @@ import { addDayPhone, updateDayProduct, getDayProducts } from "../../controllers
 import { addPromo1, getPromo1, updatePromo1 } from "../../controllers/offers/Promo1";
 import { addPromo2, getPromo2, updatePromo2 } from "../../controllers/offers/Promo2";
 import { addPromo3, getPromo3, updatePromo3 } from "../../controllers/offers/Promo3";
-import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
+import { authenticate } from "../../middleware/auth/authorization";
 import multer from "multer";
 const storage = multer.memoryStorage();
 const upload = multer({ storage });

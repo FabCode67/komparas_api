@@ -4,7 +4,7 @@ import isaValidApplication from '../../middleware/validApllication';
 import { replyToJobApplicant } from '../../controllers/replyJobApplicant';
 
 
-import { isAdminAuthenticat } from '../../middleware/auth/authorization';
+import { authenticate } from '../../middleware/auth/authorization';
 
 const applicationRouter = express.Router();
 

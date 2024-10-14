@@ -3,6 +3,24 @@ import Shop from '../../models/shop';
 import { IShop } from '../../types/shop';
 import { v2 as cloudinaryV2, UploadStream } from "cloudinary";
 import streamifier from "streamifier";
+import { AuthRequest } from '../../middleware/auth/authorization';
+
+// get all shops that are accepted or not by admin and only show the accepted shops to the customers
+export const getAllShops = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      // If the user is logged in, show all shops
+      if (req.user) {
+        const shops = await Shop.find(); // Fetch all shops
+        res.status(200).json(shops);
+      } else {
+        // If not logged in, show only accepted shops
+        const acceptedShops = await Shop.find({ isAccepted: true }); // Only fetch accepted shops
+        res.status(200).json(acceptedShops);
+      }
+    } catch (error) {
+      res.status(500).send({ message: 'Server Error', error });
+    }
+  };
 
 export const addShop = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -108,17 +126,6 @@ export const updateShop = async (req: Request, res: Response): Promise<void> => 
             const updatedShop: IShop = await shop.save();
             res.status(200).json(updatedShop);
         }
-    } catch (error) {
-        res.status(500).send(error);
-    }
-};
-
-// get all shops that are accepted
-
-export const getAllShops = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const shops: IShop[] = await Shop.find();
-        res.status(200).json(shops);
     } catch (error) {
         res.status(500).send(error);
     }

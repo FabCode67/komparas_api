@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { addProductImage, getProductImages, upDateProductImage, deleteProductImage } from "../../controllers/products/productImages";
-import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
+import { authenticate } from "../../middleware/auth/authorization";
 import multer from "multer";
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
