@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { isAdminAuthenticat } from '../../middleware/auth/authorization';
+import {authenticate } from '../../middleware/auth/authorization';
 
 import { addCategory, getAllCategories, getParentCategories, deleteCategory, getCategoryByNameOrID, updateCategory } from '../../controllers/categories/category';
 import multer from "multer";

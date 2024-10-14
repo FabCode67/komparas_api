@@ -9,7 +9,7 @@ import {
     deleteUser
  } from "../../controllers/Users/userCrud.controler";
  import { sendMessage } from "../../controllers/Users/contact";
- import { authenticat, isAdminAuthenticat } from "../../middleware/auth/authorization";
+ import { authenticate } from "../../middleware/auth/authorization";
  import multer from "multer";
 
  const storage = multer.memoryStorage();

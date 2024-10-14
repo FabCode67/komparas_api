@@ -1,46 +1,24 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import { log } from 'console';
 
-interface AuthRequest extends Request {
+export interface AuthRequest extends Request {
     user?: any; 
 }
-interface JwtPayload {
-    _id: string; 
-    role: string; 
-}
 
-export const authenticat = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
+    console.log('authHeader:', authHeader); // Debug log for header
 
-    if (!authHeader) return res.status(401).send('Access Denied');
+    // Check if there is an Authorization header
+    if (!authHeader) return next(); // If no auth header, proceed (non-authenticated user)
 
     const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
 
     try {
         const verified = jwt.verify(token, process.env.TOKEN_SECRET as string);
-        req.user = verified;
+        req.user = verified;  // Attach user info to the request if verified
         next();
     } catch (err) {
-        res.status(400).send({message:'Invalid Token'});
-    }
-};
-
-export const isAdminAuthenticat = (req: AuthRequest, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).send('Access Denied');
-    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
-    try {
-        const verified = jwt.verify(token, process.env.TOKEN_SECRET as string) as JwtPayload;
-        if (verified.role === 'admin') {
-            req.user = verified;
-            next();
-        } else {
-            res.status(403).send({
-                message:'Permission Denied'
-            });
-        }
-    } catch (err) {
-        res.status(400).send({message:'Invalid Token'});
+        res.status(400).send({ message: 'Invalid Token' });
     }
 };
